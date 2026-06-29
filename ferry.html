@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b7ec2">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>粟島汽船 ダイヤ案内ボット</title>
+<style>
+  :root{
+    --blue:#0b7ec2; --blue-d:#075f93; --bg:#eaf4fb; --bubble-bot:#ffffff;
+    --bubble-user:#0b7ec2; --txt:#1c2b33; --muted:#6b7a83;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+    background:linear-gradient(180deg,#cfe9fa,#eaf4fb 40%);
+    color:var(--txt); display:flex; justify-content:center;
+  }
+  .app{
+    width:100%; max-width:480px; height:100dvh; display:flex; flex-direction:column;
+    background:var(--bg); box-shadow:0 0 30px rgba(0,0,0,.08);
+  }
+  header{
+    background:var(--blue); color:#fff; padding:14px 16px; flex:0 0 auto;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+  }
+  header h1{font-size:17px; margin:0; display:flex; align-items:center; gap:8px;}
+  header p{margin:3px 0 0; font-size:11px; opacity:.85;}
+  #log{flex:1 1 auto; overflow-y:auto; padding:14px 12px 4px; -webkit-overflow-scrolling:touch;}
+  .row{display:flex; margin-bottom:10px;}
+  .row.bot{justify-content:flex-start;}
+  .row.user{justify-content:flex-end;}
+  .bubble{
+    max-width:82%; padding:10px 13px; border-radius:16px; font-size:14px; line-height:1.6;
+    white-space:pre-wrap; word-break:break-word; box-shadow:0 1px 2px rgba(0,0,0,.08);
+  }
+  .bot .bubble{background:var(--bubble-bot); border-bottom-left-radius:4px;}
+  .user .bubble{background:var(--bubble-user); color:#fff; border-bottom-right-radius:4px;}
+  .bubble .day{font-weight:700; color:var(--blue-d); display:block; margin-bottom:4px;}
+  .bubble table{border-collapse:collapse; margin:4px 0; width:100%; font-size:13px;}
+  .bubble td{padding:2px 6px 2px 0; vertical-align:top;}
+  .bubble .dir{color:var(--blue-d); font-weight:600; white-space:nowrap;}
+  .bubble .hs{color:#c2410c; font-weight:700;}
+  .bubble .note{font-size:11px; color:var(--muted); margin-top:6px; display:block;}
+  .bubble a{color:var(--blue-d);}
+  .quick{display:flex; flex-wrap:wrap; gap:6px; padding:6px 12px 2px;}
+  .quick button{
+    border:1px solid var(--blue); background:#fff; color:var(--blue-d);
+    border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer;
+  }
+  .quick button:active{background:var(--blue); color:#fff;}
+  form{display:flex; gap:8px; padding:10px 12px; flex:0 0 auto; background:var(--bg);}
+  #q{flex:1; border:1px solid #b9d3e3; border-radius:20px; padding:10px 14px; font-size:15px; outline:none;}
+  #q:focus{border-color:var(--blue);}
+  button.send{background:var(--blue); color:#fff; border:none; border-radius:50%; width:42px; height:42px; font-size:18px; cursor:pointer; flex:0 0 auto;}
+  .foot{text-align:center; font-size:10px; color:var(--muted); padding:0 12px 8px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>⛴️ 粟島汽船 ダイヤ案内ボット</h1>
+    <p>「何日の何時に船がある？」に自動で答えます（非公式・個人作成）</p>
+  </header>
+
+  <div id="log"></div>
+
+  <div class="quick" id="quick">
+    <button data-q="今日の船">今日</button>
+    <button data-q="明日の船">明日</button>
+    <button data-q="明後日の船">明後日</button>
+    <button data-q="今週の土曜">今週の土曜</button>
+    <button data-q="運賃">運賃</button>
+  </div>
+
+  <form id="form" autocomplete="off">
+    <input id="q" placeholder="例：6月20日 / 土曜の粟島発 / 明日 帰りの船">
+    <button class="send" type="submit" aria-label="送信">➤</button>
+  </form>
+  <div class="foot"><a href="index.html" style="color:#127a5b;font-weight:700">🏝️ 宿の予約相談はこちら</a><br>データ版: 令和8年3〜9月ダイヤ ／ v4（6/16・全便検証済）｜最新・確実な情報は公式サイトでご確認ください</div>
+</div>
+
+<script src="schedule.js"></script>
+<script>
+/* ダイヤ本体（INFO / PAT / PERIODS / scheduleForDate / DOW / iso / toMin / FARE）は
+   schedule.js 側で定義（宿フォームと共通）。ダイヤ更新は schedule.js を編集する。 */
+
+/* ---------- ユーティリティ ---------- */
+const ZEN2HAN=s=>s.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+const fmtDate=d=>`${d.getMonth()+1}月${d.getDate()}日(${DOW[d.getDay()]})`;
+
+/* ---------- 日付の解釈 ---------- */
+function parseDate(text){
+  const t=ZEN2HAN(text);
+  const today=new Date(); today.setHours(0,0,0,0);
+  if(/今日|本日/.test(t)) return today;
+  if(/明後日|あさって/.test(t)){const d=new Date(today);d.setDate(d.getDate()+2);return d;}
+  if(/明日|あした|あす/.test(t)){const d=new Date(today);d.setDate(d.getDate()+1);return d;}
+  let m=t.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日?/);
+  if(m) return new Date(today.getFullYear(),+m[1]-1,+m[2]); // ダイヤは当年(2026)固定。翌年送りしない
+  m=t.match(/(\d{1,2})\s*日/);
+  if(m){let d=new Date(today.getFullYear(),today.getMonth(),+m[1]); if(d<today) d=new Date(today.getFullYear(),today.getMonth()+1,+m[1]); return d;}
+  const wd=["日曜","月曜","火曜","水曜","木曜","金曜","土曜"];
+  for(let i=0;i<7;i++){ if(t.includes(wd[i])){const d=new Date(today); d.setDate(d.getDate()+((i-d.getDay()+7)%7)); return d;} }
+  return null;
+}
+
+/* ---------- 方向の解釈 ---------- */
+function parseDir(text){
+  if(/粟島発|島発|島から|帰り|戻り|帰る/.test(text)) return "粟";
+  if(/岩船発|岩船から|行き|渡る|島へ|粟島へ|村上/.test(text)) return "岩";
+  return null;
+}
+
+/* ---------- 返答の組み立て ---------- */
+function answerSchedule(text){
+  const d=parseDate(text);
+  if(!d) return `日付がわかりませんでした🙏\n「今日」「明日」「6月20日」「土曜」などで聞いてください。`;
+  const dir=parseDir(text);
+
+  let html=`<span class="day">📅 ${fmtDate(d)}</span>`;
+  if(day_out_of_range(d)){
+    return html+`この日付は今のダイヤ表（${INFO.source}・3〜9月）の範囲外です。`+
+      `最新は<a href="${INFO.official}" target="_blank" rel="noopener">公式サイト</a>でご確認ください。`;
+  }
+  const res=scheduleForDate(d);
+  if(!res){ return html+`ダイヤが見つかりませんでした。<a href="${INFO.official}" target="_blank" rel="noopener">公式で確認</a>してください。`; }
+  if(res.label) html=`<span class="day">📅 ${fmtDate(d)} ・${res.label}</span>`;
+
+  let list=res.sailings.slice().sort((a,b)=>toMin(a.t)-toMin(b.t));
+  if(dir) list=list.filter(s=>s.d===dir);
+
+  if(list.length===0){
+    html+= dir==="粟" ? "この日の粟島発の便はありません。" : "この日の岩船発の便はありません。";
+    return html;
+  }
+  const anyHs=list.some(s=>s.hs);
+  html+=`<table>`;
+  for(const s of list){
+    const dest=s.d==="粟"?"岩船":"粟島";
+    const depLabel=s.d==="粟"?"粟島発":"岩船発";
+    html+=`<tr><td class="dir">${depLabel}</td><td>${s.t} → ${dest}着 ${s.a}${s.hs?' <span class="hs">🚤高速船</span>':''}</td></tr>`;
+  }
+  html+=`</table>`;
+  html+=`<span class="note">「粟島発」＝島→岩船 ／ 「岩船発」＝岩船→島`+
+        (anyHs?`<br>この期間は高速船（約60分）`:`<br>フェリー（約95分）`)+`｜出航15分前までに受付`+
+        `<br>※海上状況で変更あり → <a href="${INFO.official}" target="_blank" rel="noopener">当日の運航状況</a> / TEL ${INFO.tel}</span>`;
+  return html;
+}
+const day_out_of_range=d=>{const s=iso(d);return s<INFO.validFrom||s>INFO.validTo;};
+
+function answerFare(){
+  let html=`<span class="day">💰 運賃</span><table>`;
+  for(const[k,v] of FARE.rows) html+=`<tr><td class="dir">${k}</td><td>${v}</td></tr>`;
+  html+=`</table><span class="note">${FARE.note}<br><a href="${INFO.official}" target="_blank" rel="noopener">公式の料金表</a></span>`;
+  return html;
+}
+
+function respond(text){
+  if(/運賃|料金|いくら|値段|金額/.test(ZEN2HAN(text))) return answerFare();
+  if(/使い方|ヘルプ|help|何ができ/.test(text))
+    return `日付を入れて聞いてください😊\n例：\n・「今日の船」\n・「6月20日」\n・「土曜の粟島発」\n・「明日 帰りの船」\n・「運賃」`;
+  return answerSchedule(text);
+}
+
+/* ---------- 画面表示 ---------- */
+const log=document.getElementById("log");
+function addBubble(html,who){
+  const row=document.createElement("div"); row.className=`row ${who}`;
+  const b=document.createElement("div"); b.className="bubble"; b.innerHTML=html;
+  row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight;
+}
+function ask(text){ addBubble(text.replace(/</g,"&lt;"),"user"); setTimeout(()=>addBubble(respond(text),"bot"),180); }
+
+document.getElementById("form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const q=document.getElementById("q"); const v=q.value.trim();
+  if(!v) return; q.value=""; ask(v);
+});
+document.getElementById("quick").addEventListener("click",e=>{ if(e.target.dataset.q) ask(e.target.dataset.q); });
+
+addBubble(`こんにちは！粟島汽船のダイヤ案内ボットです⛴️\n知りたい日を教えてください。\n下のボタンか、自由入力でどうぞ。`,"bot");
+</script>
+</body>
+</html>

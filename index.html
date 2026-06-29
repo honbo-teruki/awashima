@@ -3,187 +3,484 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b7ec2">
+<meta name="theme-color" content="#0e7b6c">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>粟島汽船 ダイヤ案内ボット</title>
+<title>粟島 おとまり相談フォーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --blue:#0b7ec2; --blue-d:#075f93; --bg:#eaf4fb; --bubble-bot:#ffffff;
-    --bubble-user:#0b7ec2; --txt:#1c2b33; --muted:#6b7a83;
+    --sea:#0e7b6c; --sea-d:#0a5a4f; --sea-l:#e3f2ee; --sand:#f1e7d2;
+    --bg1:#e7f2ee; --bg2:#f8f4ec; --card:#ffffff; --ink:#2b363d; --muted:#7d8a90; --line:#e8e3d7;
+    --shadow:0 6px 20px rgba(20,70,60,.07);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;height:100%;}
+  html,body{margin:0;}
   body{
-    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
-    background:linear-gradient(180deg,#cfe9fa,#eaf4fb 40%);
-    color:var(--txt); display:flex; justify-content:center;
+    font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2) 26%); background-attachment:fixed;
+    color:var(--ink); padding-bottom:48px; -webkit-font-smoothing:antialiased;
   }
-  .app{
-    width:100%; max-width:480px; height:100dvh; display:flex; flex-direction:column;
-    background:var(--bg); box-shadow:0 0 30px rgba(0,0,0,.08);
-  }
+  h1,h2,.submit,.btns button,.btns a,.price .big{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;}
+  .wrap{max-width:520px; margin:0 auto; padding:0 14px;}
+
   header{
-    background:var(--blue); color:#fff; padding:14px 16px; flex:0 0 auto;
-    box-shadow:0 2px 6px rgba(0,0,0,.15);
+    background:linear-gradient(135deg,#13917e,#0e7b6c 55%,#0a6a5d);
+    color:#fff; padding:26px 18px 30px; text-align:center;
+    border-radius:0 0 26px 26px; box-shadow:0 10px 24px rgba(14,123,108,.26); position:relative; overflow:hidden;
   }
-  header h1{font-size:17px; margin:0; display:flex; align-items:center; gap:8px;}
-  header p{margin:3px 0 0; font-size:11px; opacity:.85;}
-  #log{flex:1 1 auto; overflow-y:auto; padding:14px 12px 4px; -webkit-overflow-scrolling:touch;}
-  .row{display:flex; margin-bottom:10px;}
-  .row.bot{justify-content:flex-start;}
-  .row.user{justify-content:flex-end;}
-  .bubble{
-    max-width:82%; padding:10px 13px; border-radius:16px; font-size:14px; line-height:1.6;
-    white-space:pre-wrap; word-break:break-word; box-shadow:0 1px 2px rgba(0,0,0,.08);
-  }
-  .bot .bubble{background:var(--bubble-bot); border-bottom-left-radius:4px;}
-  .user .bubble{background:var(--bubble-user); color:#fff; border-bottom-right-radius:4px;}
-  .bubble .day{font-weight:700; color:var(--blue-d); display:block; margin-bottom:4px;}
-  .bubble table{border-collapse:collapse; margin:4px 0; width:100%; font-size:13px;}
-  .bubble td{padding:2px 6px 2px 0; vertical-align:top;}
-  .bubble .dir{color:var(--blue-d); font-weight:600; white-space:nowrap;}
-  .bubble .hs{color:#c2410c; font-weight:700;}
-  .bubble .note{font-size:11px; color:var(--muted); margin-top:6px; display:block;}
-  .bubble a{color:var(--blue-d);}
-  .quick{display:flex; flex-wrap:wrap; gap:6px; padding:6px 12px 2px;}
-  .quick button{
-    border:1px solid var(--blue); background:#fff; color:var(--blue-d);
-    border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer;
-  }
-  .quick button:active{background:var(--blue); color:#fff;}
-  form{display:flex; gap:8px; padding:10px 12px; flex:0 0 auto; background:var(--bg);}
-  #q{flex:1; border:1px solid #b9d3e3; border-radius:20px; padding:10px 14px; font-size:15px; outline:none;}
-  #q:focus{border-color:var(--blue);}
-  button.send{background:var(--blue); color:#fff; border:none; border-radius:50%; width:42px; height:42px; font-size:18px; cursor:pointer; flex:0 0 auto;}
-  .foot{text-align:center; font-size:10px; color:var(--muted); padding:0 12px 8px;}
+  header::after{content:""; position:absolute; right:-34px; top:-34px; width:130px; height:130px;
+    background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);}
+  header .emoji{font-size:13px; letter-spacing:5px; opacity:.92;}
+  header h1{font-size:21px; margin:7px 0 0; font-weight:700; letter-spacing:.5px;}
+  header p{margin:8px 0 0; font-size:11.5px; opacity:.92; line-height:1.65;}
+
+  .lead{background:#fff; border:1px solid var(--sand); border-left:4px solid #e6b34d; border-radius:14px;
+    padding:13px 15px; font-size:12.5px; line-height:1.75; margin:16px 0; box-shadow:var(--shadow); color:#4a525a;}
+  .lead b{color:var(--sea-d);}
+  .editbar{display:none; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 14px; margin:0 0 14px; font-size:12.5px; box-shadow:var(--shadow); color:#4a525a;}
+  .editbar button{width:auto; background:#fff; color:var(--sea-d); border:1.5px solid var(--sea); border-radius:10px; padding:9px 13px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .revnote{background:#fff7e6; border:1px solid #f0cf86; color:#8a5a12; border-radius:12px; padding:10px 13px; font-size:12.5px; margin:0 0 14px; font-weight:500; line-height:1.6;}
+  .consent{display:flex; align-items:flex-start; gap:10px; border:1.5px solid var(--line); border-radius:12px; padding:13px; background:#faf8f3; font-size:13px; line-height:1.65; cursor:pointer; color:#3a444b;}
+  .consent input{appearance:none; -webkit-appearance:none; width:20px; height:20px; border:1.5px solid #c4cdc9; border-radius:6px; flex:0 0 auto; position:relative; background:#fff; cursor:pointer; margin-top:1px;}
+  .consent input:checked{background:var(--sea); border-color:var(--sea);}
+  .consent input:checked::after{content:"✓"; color:#fff; font-size:13px; line-height:1; position:absolute; top:2px; left:3px;}
+  .consent:has(input:checked){border-color:var(--sea); background:var(--sea-l);}
+
+  .card{background:var(--card); border-radius:18px; padding:18px 16px; margin-bottom:14px; box-shadow:var(--shadow);}
+  .card h2{font-size:14px; margin:0 0 13px; color:var(--sea-d); display:flex; align-items:center; gap:9px; font-weight:700;}
+  .card h2::before{content:""; width:7px; height:18px; border-radius:4px; background:linear-gradient(var(--sea),#4cc0a8); flex:0 0 auto;}
+
+  label.f{display:block; font-size:13px; font-weight:500; margin:13px 0 5px; color:#3a444b;}
+  label.f .req{color:#fff; background:#e8744f; font-size:10px; margin-left:6px; padding:1px 7px; border-radius:10px; font-weight:700; vertical-align:1px;}
+  label.f .opt{color:var(--muted); font-size:11px; margin-left:6px; font-weight:400;}
+
+  input,select,textarea{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 13px;
+    font-size:16px; outline:none; background:#faf8f3; color:var(--ink); font-family:inherit; transition:.15s;}
+  input::placeholder,textarea::placeholder{color:#aeb6bb;}
+  input:focus,select:focus,textarea:focus{border-color:var(--sea); background:#fff; box-shadow:0 0 0 3px var(--sea-l);}
+  textarea{min-height:68px; resize:vertical;}
+  select{appearance:none; -webkit-appearance:none; padding-right:34px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230e7b6c' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;}
+  .row2{display:flex; gap:11px;} .row2>div{flex:1; min-width:0;}
+
+  .seg{display:flex; gap:8px; flex-wrap:wrap;}
+  .seg label{flex:1 1 46%; border:1.5px solid var(--line); border-radius:12px; padding:11px 8px; font-size:13px;
+    text-align:center; cursor:pointer; background:#faf8f3; transition:.15s; color:#5b666c;}
+  .seg input{display:none;}
+  .seg label:has(input:checked){border-color:var(--sea); background:var(--sea); color:#fff; box-shadow:0 4px 12px rgba(14,123,108,.25);}
+  .seg label:has(input:checked) span{color:#fff; font-weight:700;}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chips label{flex:1 1 46%; border:1.5px solid var(--line); border-radius:12px; padding:11px 12px; font-size:13px;
+    cursor:pointer; background:#faf8f3; display:flex; align-items:center; gap:8px; transition:.15s; color:#46504f;}
+  .chips input{appearance:none; -webkit-appearance:none; width:18px; height:18px; border:1.5px solid #c4cdc9;
+    border-radius:6px; flex:0 0 auto; position:relative; background:#fff; cursor:pointer;}
+  .chips input:checked{background:var(--sea); border-color:var(--sea);}
+  .chips input:checked::after{content:"✓"; color:#fff; font-size:12px; line-height:1; position:absolute; top:2px; left:3px;}
+  .chips label:has(input:checked){border-color:var(--sea); background:var(--sea-l); font-weight:700; color:var(--sea-d);}
+
+  .hint{font-size:11px; color:var(--muted); margin-top:5px; line-height:1.6;}
+  .boat-note{font-size:12px; background:#eef4fb; border:1px solid #d3e2ef; border-radius:10px; padding:9px 11px; margin-top:7px; color:#2f6088;}
+
+  .price{background:linear-gradient(135deg,#fdfaf2,#f1f8f5); border:1px solid var(--sand); border-radius:14px; padding:13px 15px; font-size:13px; line-height:1.75;}
+  .price .big{font-size:19px; font-weight:700; color:var(--sea-d);}
+  .price small{color:var(--muted); font-size:11px;}
+
+  .submit{width:100%; background:linear-gradient(135deg,#13917e,#0e7b6c); color:#fff; border:none; border-radius:15px;
+    padding:16px; font-size:16.5px; font-weight:700; cursor:pointer; margin-top:8px; letter-spacing:.5px;
+    box-shadow:0 8px 20px rgba(14,123,108,.32);}
+  .submit:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(14,123,108,.3);}
+  .err{color:#d2452f; font-size:12.5px; margin-top:10px; display:none; text-align:center; font-weight:500;}
+
+  .foot{text-align:center; font-size:11px; color:var(--muted); margin-top:14px; line-height:1.7;}
+  .foot a{color:var(--sea-d);}
+
+  /* 確認画面 */
+  #done{display:none;}
+  #done .card{text-align:left;}
+  .donehead{text-align:center; margin:-2px 0 14px;}
+  .donehead .ck{display:inline-flex; width:54px; height:54px; border-radius:50%; background:var(--sea-l);
+    color:var(--sea); align-items:center; justify-content:center; font-size:28px; margin-bottom:8px;}
+  .donehead b{display:block; font-size:15px; color:var(--sea-d); font-family:"Zen Maru Gothic",sans-serif;}
+  .summary{background:#faf8f3; border:1px solid var(--line); border-radius:14px; padding:15px; font-size:13.5px; line-height:1.95; white-space:pre-wrap;}
+  .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .btns button,.btns a{flex:1; min-width:45%; text-align:center; text-decoration:none; border-radius:13px; padding:14px; font-size:14.5px; font-weight:700; cursor:pointer; border:none;}
+  .b-copy{background:var(--sea-l); color:var(--sea-d); border:1.5px solid var(--sea)!important;}
+  .b-mail{background:linear-gradient(135deg,#13917e,#0e7b6c); color:#fff; box-shadow:0 6px 16px rgba(14,123,108,.3);}
+  .b-back{background:#edeae3; color:#555;}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <h1>⛴️ 粟島汽船 ダイヤ案内ボット</h1>
-    <p>「何日の何時に船がある？」に自動で答えます（非公式・個人作成）</p>
-  </header>
+<header>
+  <div class="emoji">⛴　🏝　🌊　🐟　✨</div>
+  <h1>粟島 おとまり相談</h1>
+  <p>泊まりたい情報を入れるだけ。<br>幹事が島の宿に確認します（非公式・個人運営）</p>
+</header>
+<div class="wrap">
 
-  <div id="log"></div>
-
-  <div class="quick" id="quick">
-    <button data-q="今日の船">今日</button>
-    <button data-q="明日の船">明日</button>
-    <button data-q="明後日の船">明後日</button>
-    <button data-q="今週の土曜">今週の土曜</button>
-    <button data-q="運賃">運賃</button>
+  <div class="lead">
+    これは<b>「予約の相談」フォーム</b>です。送信＝予約確定ではありません。<br>
+    入力内容をもとに、<b>粟島の宿へ「この日に泊まれますか？」と確認</b>し、取れ次第ご連絡します。<br>
+    ⚠️ <b>予約確定後の変更・キャンセルは、各自で直接お宿へ</b>ご連絡をお願いします🙇
   </div>
 
-  <form id="form" autocomplete="off">
-    <input id="q" placeholder="例：6月20日 / 土曜の粟島発 / 明日 帰りの船">
-    <button class="send" type="submit" aria-label="送信">➤</button>
+  <div class="editbar" id="editbar">
+    <span>📩 前に送った内容を<b>直したい</b>方はこちら</span>
+    <button type="button" id="loadlast">✏️ 前回の内容を呼び出して修正</button>
+  </div>
+  <div class="revnote" id="revnote" style="display:none">✏️ <b>修正モード</b>：内容を直して、もう一度送信してください。<b>最新版（修正版）</b>として届きます。</div>
+
+  <form id="form" autocomplete="on">
+    <!-- 代表者 -->
+    <div class="card">
+      <h2>① 代表者の連絡先</h2>
+      <label class="f">お名前 <span class="req">必須</span></label>
+      <input id="name" placeholder="例：粟島 太郎">
+      <label class="f">電話番号 <span class="req">必須</span></label>
+      <input id="tel" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
+      <label class="f">メールアドレス <span class="opt">任意（メール連絡希望の方は必須）</span></label>
+      <input id="email" type="email" inputmode="email" placeholder="例：taro@example.com">
+      <label class="f">希望の連絡方法 <span class="req">必須</span></label>
+      <div class="seg" id="contact">
+        <label><input type="radio" name="contact" value="電話" checked><span>📞 電話がいい</span></label>
+        <label><input type="radio" name="contact" value="メール"><span>✉️ メールがいい</span></label>
+      </div>
+    </div>
+
+    <!-- 日程・人数 -->
+    <div class="card">
+      <h2>② 宿泊の日程・人数</h2>
+      <div class="row2">
+        <div>
+          <label class="f">行く日（チェックイン）<span class="req">必須</span></label>
+          <input id="checkin" type="date">
+        </div>
+        <div>
+          <label class="f">泊数 <span class="req">必須</span></label>
+          <select id="nights"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+      </div>
+      <div id="checkout-hint" class="hint"></div>
+
+      <label class="f">部屋数・人数の内訳 <span class="req">必須</span></label>
+      <div class="row2">
+        <div><span class="hint">部屋数</span><select id="rooms"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div><span class="hint">大人</span><input id="adults" type="number" inputmode="numeric" min="0" value="1"></div>
+        <div><span class="hint">子供</span><input id="kids" type="number" inputmode="numeric" min="0" value="0"></div>
+      </div>
+    </div>
+
+    <!-- 食事 -->
+    <div class="card">
+      <h2>③ 食事</h2>
+      <div class="seg" id="meal">
+        <label><input type="radio" name="meal" value="2食付（朝・夕）" checked><span>2食付（朝・夕）</span></label>
+        <label><input type="radio" name="meal" value="夕食のみ"><span>夕食のみ</span></label>
+        <label><input type="radio" name="meal" value="朝食のみ"><span>朝食のみ</span></label>
+        <label><input type="radio" name="meal" value="素泊まり"><span>素泊まり</span></label>
+      </div>
+      <div class="hint" style="margin-top:8px">料金の目安（大人・1泊／宿により異なります）</div>
+      <div class="price" id="price"></div>
+    </div>
+
+    <!-- 船 -->
+    <div class="card">
+      <h2>④ 何時の船で来ますか？</h2>
+      <div class="hint">チェックイン日の「岩船発（島へ向かう便）」から選べます。</div>
+      <select id="boat"></select>
+      <div id="boat-note" class="boat-note" style="display:none"></div>
+      <div class="hint" style="margin-top:6px">船の全時刻は <a id="ferrylink" href="ferry.html" target="_blank" rel="noopener">⛴️ 粟島汽船ダイヤ案内ボット</a> でも確認できます。</div>
+    </div>
+
+    <!-- やってみたいこと -->
+    <div class="card">
+      <h2>🎒 島でやってみたいこと <span style="font-weight:400;color:var(--muted);font-size:11px">任意・複数OK</span></h2>
+      <div class="hint" style="margin-bottom:9px">気になるものにチェック！事前に分かると、体験や観光協会での予約準備がスムーズです（確約ではなく希望の把握用です）。</div>
+      <div class="chips" id="exp">
+        <label><input type="checkbox" name="exp" value="わっぱ煮を食べる"> 🍲 わっぱ煮を食べる</label>
+        <label><input type="checkbox" name="exp" value="レンタサイクル"> 🚲 レンタサイクルで島めぐり</label>
+        <label><input type="checkbox" name="exp" value="穴釣り"> 🎣 穴釣り</label>
+        <label><input type="checkbox" name="exp" value="海釣り（船釣り）"> 🚤 海釣り（船釣り）</label>
+        <label><input type="checkbox" name="exp" value="乗馬・あわしま牧場見学"> 🐴 乗馬・あわしま牧場見学</label>
+        <label><input type="checkbox" name="exp" value="星空観察"> 🌌 星空観察</label>
+        <label><input type="checkbox" name="exp" value="海で泳ぐ"> 🏊 海で泳ぐ</label>
+        <label><input type="checkbox" name="exp" value="レジャー（海・自然遊び）"> 🏝️ レジャー（海・自然遊び）</label>
+        <label><input type="checkbox" name="exp" value="キャンプ"> ⛺ キャンプ</label>
+      </div>
+      <label class="f" style="margin-top:11px">その他・やってみたいこと <span class="opt">自由記入</span></label>
+      <input id="expOther" placeholder="例：島を一周したい、夕日スポットに行きたい 等">
+    </div>
+
+    <!-- 送迎・宿・備考 -->
+    <div class="card">
+      <h2>⑤ 港までの送迎</h2>
+      <div class="seg" id="pickup">
+        <label><input type="radio" name="pickup" value="送迎を希望する" checked><span>希望する</span></label>
+        <label><input type="radio" name="pickup" value="送迎は不要"><span>不要</span></label>
+      </div>
+
+      <label class="f" style="margin-top:14px">泊まりたいエリア <span class="opt">任意・要望でOK</span></label>
+      <div class="seg" id="area">
+        <label><input type="radio" name="area" value="内浦"><span>内浦</span></label>
+        <label><input type="radio" name="area" value="釜谷"><span>釜谷</span></label>
+        <label><input type="radio" name="area" value="どちらでもいい" checked><span>どちらでもいい</span></label>
+      </div>
+      <div class="hint">内浦・釜谷は粟島の2つの集落です。こだわりがなければ「どちらでもいい」でOK。</div>
+
+      <label class="f" style="margin-top:14px">希望のお宿 <span class="opt">任意・未定でOK</span></label>
+      <select id="yado"></select>
+      <div class="hint">特に希望がなければ「おまかせ（未定）」でOK。空き状況で調整します。</div>
+
+      <label class="f" style="margin-top:14px">ご要望・備考 <span class="opt">任意</span></label>
+      <textarea id="note" placeholder="例：アレルギー、子供の年齢、和室希望、到着が遅れるかも 等"></textarea>
+    </div>
+
+    <!-- 個人情報の同意 -->
+    <div class="card">
+      <h2>📜 個人情報の取扱い</h2>
+      <div class="hint" style="margin-bottom:11px; line-height:1.7">
+        ご入力いただいた情報（お名前・電話番号・メール等）は、<b>粟島での宿泊・体験の相談と調整の目的のみ</b>に使用し、必要な範囲でお宿・関係者に共有します。それ以外の目的には使用しません。
+      </div>
+      <label class="consent"><input type="checkbox" id="agree"><span>上記に同意して送信します <span class="req">必須</span></span></label>
+    </div>
+
+    <button type="button" class="submit" id="go">この内容で相談する →</button>
+    <div class="err" id="err"></div>
+    <div class="foot">
+      入力された個人情報は、宿泊調整の目的のみに使用します。<br>
+      ※料金・空き状況は宿により異なります。最終的な金額は宿からの回答でご確認ください。
+    </div>
   </form>
-  <div class="foot"><a href="yado.html" style="color:#127a5b;font-weight:700">🏝️ 宿の予約相談はこちら</a><br>データ版: 令和8年3〜9月ダイヤ ／ v4（6/16・全便検証済）｜最新・確実な情報は公式サイトでご確認ください</div>
+
+  <!-- 確認・送信後 -->
+  <div id="done">
+    <div class="card">
+      <div class="donehead"><span class="ck">✓</span><b>送信しました！</b><div style="font-size:12px;color:var(--muted);margin-top:4px;font-weight:400">幹事に届きました。宿の空き状況を確認してご連絡します🙏</div></div>
+      <div class="summary" id="summary"></div>
+      <div class="btns">
+        <button class="b-copy" id="copy">📋 内容をコピー</button>
+        <a class="b-mail" id="mail" href="#">✉️ メールでも送る（任意）</a>
+      </div>
+      <div class="btns"><button class="b-back" id="back">← 入力に戻る</button></div>
+      <div class="foot" style="margin-top:14px">
+        送信内容は自動で幹事に届き、控えメールもお送りします（メール入力時）。「✉️ メールでも送る」は任意の控えです。<br>
+        ✏️ 内容を間違えたら「← 入力に戻る」で直して再送信すると、<b>最新版（修正版）</b>として届きます。<br>
+        ⚠️ 予約確定後の変更は各自で直接お宿へご連絡ください。
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- フェリー時刻データ（共通） -->
 <script src="schedule.js"></script>
 <script>
-/* ダイヤ本体（INFO / PAT / PERIODS / scheduleForDate / DOW / iso / toMin / FARE）は
-   schedule.js 側で定義（宿フォームと共通）。ダイヤ更新は schedule.js を編集する。 */
+/* ===== 設定 ===== */
+const CONFIG = {
+  kanjiMail: "honbo@reterras.co.jp",   // 幹事の連絡先（フォーム送信先）
+  sheetEndpoint: "https://script.google.com/macros/s/AKfycbwEpEtxiRDrs4_gnv60VC_wd5h48ux-fY0y6wmPmOGJX-Hp6LsGdRtjb-kL4uGge8U1_g/exec",  // GAS（スプレッドシート＆自動通知）
+};
 
-/* ---------- ユーティリティ ---------- */
-const ZEN2HAN=s=>s.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
-const fmtDate=d=>`${d.getMonth()+1}月${d.getDate()}日(${DOW[d.getDay()]})`;
+/* 宿一覧（出典: awa-isle.jp/sightseeing/） */
+const YADO = [
+  {g:"内浦地区", items:["三吉","弥助","じんきち","みなとや","弥三郎","与平","治郎作","なおや","みやこや","ますや","旅館たてしま","かねひら旅館"]},
+  {g:"釜谷地区", items:["松太屋","渡佐","市左ェ門","源左ェ門","亀屋","後藤","八幡"]},
+];
 
-/* ---------- 日付の解釈 ---------- */
-function parseDate(text){
-  const t=ZEN2HAN(text);
-  const today=new Date(); today.setHours(0,0,0,0);
-  if(/今日|本日/.test(t)) return today;
-  if(/明後日|あさって/.test(t)){const d=new Date(today);d.setDate(d.getDate()+2);return d;}
-  if(/明日|あした|あす/.test(t)){const d=new Date(today);d.setDate(d.getDate()+1);return d;}
-  let m=t.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日?/);
-  if(m) return new Date(today.getFullYear(),+m[1]-1,+m[2]); // ダイヤは当年(2026)固定。翌年送りしない
-  m=t.match(/(\d{1,2})\s*日/);
-  if(m){let d=new Date(today.getFullYear(),today.getMonth(),+m[1]); if(d<today) d=new Date(today.getFullYear(),today.getMonth()+1,+m[1]); return d;}
-  const wd=["日曜","月曜","火曜","水曜","木曜","金曜","土曜"];
-  for(let i=0;i<7;i++){ if(t.includes(wd[i])){const d=new Date(today); d.setDate(d.getDate()+((i-d.getDay()+7)%7)); return d;} }
-  return null;
-}
+/* 料金目安（大人1泊・出典: 輝紀提供） */
+const PRICE = {
+  "2食付（朝・夕）": {lo:9900, hi:11000, label:"1泊2食"},
+  "素泊まり":      {lo:6050, hi:6600,  label:"素泊まり"},
+  // 朝/夕のみは「素泊まり〜2食」の間。正確な額は宿により異なるため範囲で表示
+  "夕食のみ":      {lo:null, hi:null,  label:"夕食のみ（素泊まり＋夕食代）"},
+  "朝食のみ":      {lo:null, hi:null,  label:"朝食のみ（素泊まり＋朝食代）"},
+};
+const yen = n => n.toLocaleString("ja-JP")+"円";
 
-/* ---------- 方向の解釈 ---------- */
-function parseDir(text){
-  if(/粟島発|島発|島から|帰り|戻り|帰る/.test(text)) return "粟";
-  if(/岩船発|岩船から|行き|渡る|島へ|粟島へ|村上/.test(text)) return "岩";
-  return null;
-}
+/* ---- 状態 ---- */
+let revision=false;            // 修正版かどうか
+const STORE_KEY="awa_yado_last";
 
-/* ---------- 返答の組み立て ---------- */
-function answerSchedule(text){
-  const d=parseDate(text);
-  if(!d) return `日付がわかりませんでした🙏\n「今日」「明日」「6月20日」「土曜」などで聞いてください。`;
-  const dir=parseDir(text);
-
-  let html=`<span class="day">📅 ${fmtDate(d)}</span>`;
-  if(day_out_of_range(d)){
-    return html+`この日付は今のダイヤ表（${INFO.source}・3〜9月）の範囲外です。`+
-      `最新は<a href="${INFO.official}" target="_blank" rel="noopener">公式サイト</a>でご確認ください。`;
+/* ---- 宿プルダウン ---- */
+const $=id=>document.getElementById(id);
+(function(){
+  const sel=$("yado"); sel.innerHTML='<option value="おまかせ（未定）">おまかせ（未定）</option>';
+  for(const grp of YADO){
+    const og=document.createElement("optgroup"); og.label=grp.g;
+    for(const n of grp.items){ const o=document.createElement("option"); o.value=n; o.textContent=n; og.appendChild(o); }
+    sel.appendChild(og);
   }
-  const res=scheduleForDate(d);
-  if(!res){ return html+`ダイヤが見つかりませんでした。<a href="${INFO.official}" target="_blank" rel="noopener">公式で確認</a>してください。`; }
-  if(res.label) html=`<span class="day">📅 ${fmtDate(d)} ・${res.label}</span>`;
+})();
 
-  let list=res.sailings.slice().sort((a,b)=>toMin(a.t)-toMin(b.t));
-  if(dir) list=list.filter(s=>s.d===dir);
+/* ---- チェックイン日：デフォルト＆ダイヤ範囲 ---- */
+(function(){
+  const ci=$("checkin");
+  ci.min="2026-03-01"; ci.max="2026-09-30";
+})();
 
-  if(list.length===0){
-    html+= dir==="粟" ? "この日の粟島発の便はありません。" : "この日の岩船発の便はありません。";
-    return html;
+/* ---- 料金目安の更新 ---- */
+function curMeal(){ return document.querySelector('input[name=meal]:checked').value; }
+function updatePrice(){
+  const meal=curMeal(); const ad=+$("adults").value||0; const kd=+$("kids").value||0;
+  const p=PRICE[meal];
+  let html="";
+  if(p.lo!=null){
+    const lo=ad*p.lo + kd*Math.max(p.lo-1000,0);
+    const hi=ad*p.hi + kd*Math.max(p.hi-1000,0);
+    html=`<span class="big">約 ${yen(lo)} 〜 ${yen(hi)}</span><br>`+
+         `<small>${p.label}：大人 約${yen(p.lo)}〜${yen(p.hi)} ／ 子供 大人−約1,000円</small>`;
+  }else{
+    const s=PRICE["素泊まり"], f=PRICE["2食付（朝・夕）"];
+    html=`<span class="big">宿に要確認</span><br>`+
+         `<small>${p.label}。目安は「素泊まり（約${yen(s.lo)}〜）」〜「2食付（約${yen(f.hi)}）」の間。子供は大人−約1,000円</small>`;
   }
-  const anyHs=list.some(s=>s.hs);
-  html+=`<table>`;
-  for(const s of list){
-    const dest=s.d==="粟"?"岩船":"粟島";
-    const depLabel=s.d==="粟"?"粟島発":"岩船発";
-    html+=`<tr><td class="dir">${depLabel}</td><td>${s.t} → ${dest}着 ${s.a}${s.hs?' <span class="hs">🚤高速船</span>':''}</td></tr>`;
+  html+=`<br><small>※別途クーラー代がかかる場合があります。あくまで目安・要確認です。</small>`;
+  $("price").innerHTML=html;
+}
+
+/* ---- 船プルダウン（チェックイン日の岩船発）---- */
+function updateBoats(){
+  const sel=$("boat"), note=$("boat-note"); sel.innerHTML="";
+  const v=$("checkin").value;
+  const add=(val,txt)=>{const o=document.createElement("option");o.value=val;o.textContent=txt;sel.appendChild(o);};
+  add("未定・あとで連絡","未定・あとで連絡");
+  note.style.display="none";
+  if(!v){ return; }
+  const d=new Date(v+"T00:00:00");
+  const r=boatsFor(d,"岩");   // 島へ向かう便
+  if(r.outOfRange){ note.style.display="block"; note.textContent="この日付は現在のダイヤ表（3〜9月）の範囲外です。船の時刻は粟島汽船の公式でご確認ください。"; return; }
+  if(r.list.length===0){ note.style.display="block"; note.textContent="この日は岩船発の便が見当たりません。日付をご確認ください。"; return; }
+  for(const s of r.list){ add(`岩船発 ${s.t}（粟島着 ${s.a}）${s.hs?" 高速船":""}`, `岩船発 ${s.t} → 粟島着 ${s.a}${s.hs?" 🚤高速船":""}`); }
+  if(r.label){ note.style.display="block"; note.textContent="この日は特別ダイヤ（"+r.label+"）です。"; }
+}
+
+/* ---- 泊数→チェックアウト表示 ---- */
+function updateCheckout(){
+  const v=$("checkin").value; const n=+$("nights").value||1;
+  if(!v){ $("checkout-hint").textContent=""; return; }
+  const d=new Date(v+"T00:00:00"); d.setDate(d.getDate()+n);
+  const w=["日","月","火","水","木","金","土"][d.getDay()];
+  $("checkout-hint").textContent=`チェックアウト：${d.getMonth()+1}月${d.getDate()}日(${w}) 予定（${n}泊）`;
+}
+
+/* ---- イベント ---- */
+$("meal").addEventListener("change",updatePrice);
+$("adults").addEventListener("input",updatePrice);
+$("kids").addEventListener("input",updatePrice);
+$("checkin").addEventListener("change",()=>{updateBoats();updateCheckout();});
+$("nights").addEventListener("change",updateCheckout);
+updatePrice(); updateBoats();
+
+/* ---- 送信 ---- */
+function exps(){ return [...document.querySelectorAll('input[name=exp]:checked')].map(c=>c.value); }
+function expText(){
+  const list=exps(); const other=$("expOther").value.trim();
+  let t=list.join("、");
+  if(other) t+=(t?"、":"")+"その他:"+other;
+  return t||"特になし";
+}
+const pick=n=>document.querySelector('input[name='+n+']:checked').value;
+function buildSummary(){
+  const meal=curMeal();
+  const ci=$("checkin").value;
+  let ciTxt=ci;
+  if(ci){const d=new Date(ci+"T00:00:00");const w=["日","月","火","水","木","金","土"][d.getDay()];ciTxt=`${d.getMonth()+1}月${d.getDate()}日(${w})`;}
+  const lines=[
+    "■ 粟島 宿泊 予約相談"+(revision?"（※修正版・前回分を更新）":""),
+    "代表者　： "+$("name").value,
+    "電話　　： "+$("tel").value,
+    "メール　： "+($("email").value||"（なし）"),
+    "希望の連絡方法： "+pick("contact"),
+    "行く日　： "+ciTxt+"　／　"+$("nights").value+"泊",
+    "部屋数　： "+$("rooms").value+"室",
+    "人数　　： 大人"+( +$("adults").value||0 )+"名・子供"+( +$("kids").value||0 )+"名",
+    "食事　　： "+meal,
+    "来る船　： "+$("boat").value,
+    "送迎　　： "+pick("pickup"),
+    "エリア希望： "+pick("area"),
+    "希望の宿： "+$("yado").value,
+    "やりたいこと： "+expText(),
+    "備考　　： "+($("note").value||"なし"),
+    "個人情報の取扱い： "+($("agree").checked?"同意":"未同意"),
+  ];
+  return lines.join("\n");
+}
+function validate(){
+  if(!$("name").value.trim()) return "代表者のお名前を入力してください。";
+  if(!$("tel").value.trim())  return "電話番号を入力してください。";
+  if(!$("checkin").value)     return "行く日（チェックイン）を選んでください。";
+  if((+$("adults").value||0)+(+$("kids").value||0)<=0) return "人数（大人・子供）を入力してください。";
+  const email=$("email").value.trim();
+  if(pick("contact")==="メール" && !email) return "メール連絡をご希望の場合は、メールアドレスを入力してください。";
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "メールアドレスの形式をご確認ください。";
+  if(!$("agree").checked) return "個人情報の取扱いに同意のうえ送信してください。";
+  return "";
+}
+$("go").addEventListener("click",()=>{
+  const e=validate();
+  const box=$("err");
+  if(e){ box.textContent=e; box.style.display="block"; window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}); return; }
+  box.style.display="none";
+  const summary=buildSummary();
+  $("summary").textContent=summary;
+  const subject="【粟島 宿泊相談"+(revision?"・修正版":"")+"】"+$("name").value+"様 "+( $("checkin").value||"" );
+  const email=$("email").value.trim();
+  let href="mailto:"+CONFIG.kanjiMail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(summary);
+  if(email) href+="&cc="+encodeURIComponent(email);   // 相手にも控えが届く
+  $("mail").href=href;
+  // 任意：スプレッドシート自動保存＋自動メール通知（GAS URLが設定されていれば送る）
+  if(CONFIG.sheetEndpoint){
+    try{ fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",body:JSON.stringify(collectData())}); }catch(err){}
   }
-  html+=`</table>`;
-  html+=`<span class="note">「粟島発」＝島→岩船 ／ 「岩船発」＝岩船→島`+
-        (anyHs?`<br>この期間は高速船（約60分）`:`<br>フェリー（約95分）`)+`｜出航15分前までに受付`+
-        `<br>※海上状況で変更あり → <a href="${INFO.official}" target="_blank" rel="noopener">当日の運航状況</a> / TEL ${INFO.tel}</span>`;
-  return html;
-}
-const day_out_of_range=d=>{const s=iso(d);return s<INFO.validFrom||s>INFO.validTo;};
-
-function answerFare(){
-  let html=`<span class="day">💰 運賃</span><table>`;
-  for(const[k,v] of FARE.rows) html+=`<tr><td class="dir">${k}</td><td>${v}</td></tr>`;
-  html+=`</table><span class="note">${FARE.note}<br><a href="${INFO.official}" target="_blank" rel="noopener">公式の料金表</a></span>`;
-  return html;
-}
-
-function respond(text){
-  if(/運賃|料金|いくら|値段|金額/.test(ZEN2HAN(text))) return answerFare();
-  if(/使い方|ヘルプ|help|何ができ/.test(text))
-    return `日付を入れて聞いてください😊\n例：\n・「今日の船」\n・「6月20日」\n・「土曜の粟島発」\n・「明日 帰りの船」\n・「運賃」`;
-  return answerSchedule(text);
-}
-
-/* ---------- 画面表示 ---------- */
-const log=document.getElementById("log");
-function addBubble(html,who){
-  const row=document.createElement("div"); row.className=`row ${who}`;
-  const b=document.createElement("div"); b.className="bubble"; b.innerHTML=html;
-  row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight;
-}
-function ask(text){ addBubble(text.replace(/</g,"&lt;"),"user"); setTimeout(()=>addBubble(respond(text),"bot"),180); }
-
-document.getElementById("form").addEventListener("submit",e=>{
-  e.preventDefault();
-  const q=document.getElementById("q"); const v=q.value.trim();
-  if(!v) return; q.value=""; ask(v);
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(collectData())); $("editbar").style.display="flex"; }catch(e){}
+  $("form").style.display="none"; $("done").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
 });
-document.getElementById("quick").addEventListener("click",e=>{ if(e.target.dataset.q) ask(e.target.dataset.q); });
+function collectData(){
+  return {
+    name:$("name").value, tel:$("tel").value, checkin:$("checkin").value, nights:$("nights").value,
+    rooms:$("rooms").value, adults:$("adults").value, kids:$("kids").value, meal:curMeal(),
+    boat:$("boat").value, pickup:pick("pickup"), area:pick("area"),
+    yado:$("yado").value, experiences:exps().join("、"), expOther:$("expOther").value,
+    email:$("email").value, contact:pick("contact"), kind:revision?"修正版":"新規",
+    agree:$("agree").checked?"同意":"", note:$("note").value, ts:new Date().toString()
+  };
+}
+$("copy").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText($("summary").textContent); $("copy").textContent="✅ コピーしました"; }
+  catch(e){ $("copy").textContent="長押しでコピーしてください"; }
+});
+$("back").addEventListener("click",()=>{
+  $("done").style.display="none"; $("form").style.display="block";
+  revision=true; $("revnote").style.display="block";   // 戻って直す＝修正版扱い
+  window.scrollTo({top:0,behavior:"smooth"});
+});
 
-addBubble(`こんにちは！粟島汽船のダイヤ案内ボットです⛴️\n知りたい日を教えてください。\n下のボタンか、自由入力でどうぞ。`,"bot");
+/* ---- 修正：前回送った内容を呼び出して直す ---- */
+function setRadio(name,val){ const el=document.querySelector('input[name='+name+'][value="'+val+'"]'); if(el) el.click(); }
+function loadSaved(){
+  let d; try{ d=JSON.parse(localStorage.getItem(STORE_KEY)||""); }catch(e){}
+  if(!d){ alert("前回の入力が見つかりませんでした（この端末・ブラウザに保存がない場合は出ません）。"); return; }
+  $("name").value=d.name||""; $("tel").value=d.tel||""; $("email").value=d.email||"";
+  setRadio("contact",d.contact);
+  $("checkin").value=d.checkin||""; $("checkin").dispatchEvent(new Event("change"));
+  $("nights").value=d.nights||"1"; $("nights").dispatchEvent(new Event("change"));
+  $("rooms").value=d.rooms||"1"; $("adults").value=d.adults||"1"; $("kids").value=d.kids||"0";
+  setRadio("meal",d.meal); updatePrice();
+  const bo=[...$("boat").options].find(o=>o.value===d.boat); if(bo) $("boat").value=d.boat;
+  setRadio("pickup",d.pickup); setRadio("area",d.area);
+  $("yado").value=d.yado||"おまかせ（未定）";
+  const exset=new Set(String(d.experiences||"").split("、").filter(Boolean));
+  document.querySelectorAll('input[name=exp]').forEach(c=>{ c.checked=exset.has(c.value); });
+  $("expOther").value=d.expOther||""; $("note").value=d.note||"";
+  revision=true; $("revnote").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("loadlast").addEventListener("click",loadSaved);
+if(localStorage.getItem(STORE_KEY)) $("editbar").style.display="flex";
 </script>
 </body>
 </html>

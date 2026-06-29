@@ -16,7 +16,7 @@
  */
 var NOTIFY_EMAIL = "honbo@reterras.co.jp";                  // 幹事（通知の宛先）
 var SHEET_NAME   = "予約相談";
-var FORM_URL     = "https://honbo-teruki.github.io/awashima-ferry/yado.html";
+var FORM_URL     = "https://honbo-teruki.github.io/awashima/";
 var FERRY_TIMETABLE_URL = "https://awashimakisen.co.jp/schedule.html";
 
 var HEADER = ["受付日時","種別","代表者","電話","メール","連絡方法","行く日","泊数","部屋数","大人","子供",
