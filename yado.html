@@ -3,63 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#127a5b">
+<meta name="theme-color" content="#0e7b6c">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>粟島 民宿 予約相談フォーム</title>
+<title>粟島 おとまり相談フォーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --grn:#127a5b; --grn-d:#0c5d45; --bg:#eef6f2; --card:#fff; --txt:#1c2b33; --muted:#6b7a83; --line:#cfe0d8; }
+  :root{
+    --sea:#0e7b6c; --sea-d:#0a5a4f; --sea-l:#e3f2ee; --sand:#f1e7d2;
+    --bg1:#e7f2ee; --bg2:#f8f4ec; --card:#ffffff; --ink:#2b363d; --muted:#7d8a90; --line:#e8e3d7;
+    --shadow:0 6px 20px rgba(20,70,60,.07);
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;}
-  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
-    background:linear-gradient(180deg,#d7ece3,#eef6f2 40%); color:var(--txt); padding-bottom:40px;}
-  .wrap{max-width:520px; margin:0 auto; padding:0 12px;}
-  header{background:var(--grn); color:#fff; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.15);}
-  header h1{font-size:18px; margin:0;}
-  header p{margin:4px 0 0; font-size:11px; opacity:.9;}
-  .lead{background:#fffdf2; border:1px solid #ecd9a0; border-radius:10px; padding:11px 13px; font-size:12.5px; line-height:1.65; margin:14px 0;}
-  .lead b{color:var(--grn-d);}
-  .card{background:var(--card); border-radius:12px; padding:15px; margin-bottom:13px; box-shadow:0 1px 3px rgba(0,0,0,.06);}
-  .card h2{font-size:13px; margin:0 0 11px; color:var(--grn-d); border-left:4px solid var(--grn); padding-left:8px;}
-  label.f{display:block; font-size:13px; font-weight:600; margin:10px 0 4px;}
-  label.f .req{color:#d23; font-size:11px; margin-left:5px;}
-  label.f .opt{color:var(--muted); font-size:11px; margin-left:5px; font-weight:400;}
-  input,select,textarea{width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px; font-size:16px; outline:none; background:#fff; color:var(--txt);}
-  input:focus,select:focus,textarea:focus{border-color:var(--grn);}
-  textarea{min-height:64px; resize:vertical;}
-  .row2{display:flex; gap:10px;} .row2>div{flex:1;}
+  body{
+    font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2) 26%); background-attachment:fixed;
+    color:var(--ink); padding-bottom:48px; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,.submit,.btns button,.btns a,.price .big{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;}
+  .wrap{max-width:520px; margin:0 auto; padding:0 14px;}
+
+  header{
+    background:linear-gradient(135deg,#13917e,#0e7b6c 55%,#0a6a5d);
+    color:#fff; padding:26px 18px 30px; text-align:center;
+    border-radius:0 0 26px 26px; box-shadow:0 10px 24px rgba(14,123,108,.26); position:relative; overflow:hidden;
+  }
+  header::after{content:""; position:absolute; right:-34px; top:-34px; width:130px; height:130px;
+    background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);}
+  header .emoji{font-size:13px; letter-spacing:5px; opacity:.92;}
+  header h1{font-size:21px; margin:7px 0 0; font-weight:700; letter-spacing:.5px;}
+  header p{margin:8px 0 0; font-size:11.5px; opacity:.92; line-height:1.65;}
+
+  .lead{background:#fff; border:1px solid var(--sand); border-left:4px solid #e6b34d; border-radius:14px;
+    padding:13px 15px; font-size:12.5px; line-height:1.75; margin:16px 0; box-shadow:var(--shadow); color:#4a525a;}
+  .lead b{color:var(--sea-d);}
+
+  .card{background:var(--card); border-radius:18px; padding:18px 16px; margin-bottom:14px; box-shadow:var(--shadow);}
+  .card h2{font-size:14px; margin:0 0 13px; color:var(--sea-d); display:flex; align-items:center; gap:9px; font-weight:700;}
+  .card h2::before{content:""; width:7px; height:18px; border-radius:4px; background:linear-gradient(var(--sea),#4cc0a8); flex:0 0 auto;}
+
+  label.f{display:block; font-size:13px; font-weight:500; margin:13px 0 5px; color:#3a444b;}
+  label.f .req{color:#fff; background:#e8744f; font-size:10px; margin-left:6px; padding:1px 7px; border-radius:10px; font-weight:700; vertical-align:1px;}
+  label.f .opt{color:var(--muted); font-size:11px; margin-left:6px; font-weight:400;}
+
+  input,select,textarea{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 13px;
+    font-size:16px; outline:none; background:#faf8f3; color:var(--ink); font-family:inherit; transition:.15s;}
+  input::placeholder,textarea::placeholder{color:#aeb6bb;}
+  input:focus,select:focus,textarea:focus{border-color:var(--sea); background:#fff; box-shadow:0 0 0 3px var(--sea-l);}
+  textarea{min-height:68px; resize:vertical;}
+  select{appearance:none; -webkit-appearance:none; padding-right:34px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230e7b6c' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;}
+  .row2{display:flex; gap:11px;} .row2>div{flex:1; min-width:0;}
+
   .seg{display:flex; gap:8px; flex-wrap:wrap;}
-  .seg label{flex:1; min-width:46%; border:1px solid var(--line); border-radius:8px; padding:9px; font-size:13px; text-align:center; cursor:pointer; background:#fff;}
+  .seg label{flex:1 1 46%; border:1.5px solid var(--line); border-radius:12px; padding:11px 8px; font-size:13px;
+    text-align:center; cursor:pointer; background:#faf8f3; transition:.15s; color:#5b666c;}
   .seg input{display:none;}
-  .seg input:checked + span{font-weight:700; color:var(--grn-d);}
-  .seg label:has(input:checked){border-color:var(--grn); background:#e9f5f0;}
+  .seg label:has(input:checked){border-color:var(--sea); background:var(--sea); color:#fff; box-shadow:0 4px 12px rgba(14,123,108,.25);}
+  .seg label:has(input:checked) span{color:#fff; font-weight:700;}
+
   .chips{display:flex; flex-wrap:wrap; gap:8px;}
-  .chips label{flex:1 1 46%; border:1px solid var(--line); border-radius:9px; padding:10px 11px; font-size:13px; cursor:pointer; background:#fff; display:flex; align-items:center; gap:7px;}
-  .chips input{accent-color:var(--grn); width:auto; flex:0 0 auto;}
-  .chips label:has(input:checked){border-color:var(--grn); background:#e9f5f0; font-weight:700; color:var(--grn-d);}
-  .hint{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5;}
-  .boat-note{font-size:12px; background:#eef4fb; border:1px solid #cfe0ef; border-radius:8px; padding:8px 10px; margin-top:6px; color:#2a5f86;}
-  .price{background:#f3faf6; border:1px dashed var(--grn); border-radius:10px; padding:11px 13px; font-size:13px; line-height:1.7;}
-  .price .big{font-size:17px; font-weight:700; color:var(--grn-d);}
+  .chips label{flex:1 1 46%; border:1.5px solid var(--line); border-radius:12px; padding:11px 12px; font-size:13px;
+    cursor:pointer; background:#faf8f3; display:flex; align-items:center; gap:8px; transition:.15s; color:#46504f;}
+  .chips input{appearance:none; -webkit-appearance:none; width:18px; height:18px; border:1.5px solid #c4cdc9;
+    border-radius:6px; flex:0 0 auto; position:relative; background:#fff; cursor:pointer;}
+  .chips input:checked{background:var(--sea); border-color:var(--sea);}
+  .chips input:checked::after{content:"✓"; color:#fff; font-size:12px; line-height:1; position:absolute; top:2px; left:3px;}
+  .chips label:has(input:checked){border-color:var(--sea); background:var(--sea-l); font-weight:700; color:var(--sea-d);}
+
+  .hint{font-size:11px; color:var(--muted); margin-top:5px; line-height:1.6;}
+  .boat-note{font-size:12px; background:#eef4fb; border:1px solid #d3e2ef; border-radius:10px; padding:9px 11px; margin-top:7px; color:#2f6088;}
+
+  .price{background:linear-gradient(135deg,#fdfaf2,#f1f8f5); border:1px solid var(--sand); border-radius:14px; padding:13px 15px; font-size:13px; line-height:1.75;}
+  .price .big{font-size:19px; font-weight:700; color:var(--sea-d);}
   .price small{color:var(--muted); font-size:11px;}
-  .submit{width:100%; background:var(--grn); color:#fff; border:none; border-radius:10px; padding:15px; font-size:16px; font-weight:700; cursor:pointer; margin-top:6px;}
-  .submit:active{background:var(--grn-d);}
-  .err{color:#d23; font-size:12px; margin-top:8px; display:none;}
-  .foot{text-align:center; font-size:11px; color:var(--muted); margin-top:10px; line-height:1.6;}
-  .foot a{color:var(--grn-d);}
+
+  .submit{width:100%; background:linear-gradient(135deg,#13917e,#0e7b6c); color:#fff; border:none; border-radius:15px;
+    padding:16px; font-size:16.5px; font-weight:700; cursor:pointer; margin-top:8px; letter-spacing:.5px;
+    box-shadow:0 8px 20px rgba(14,123,108,.32);}
+  .submit:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(14,123,108,.3);}
+  .err{color:#d2452f; font-size:12.5px; margin-top:10px; display:none; text-align:center; font-weight:500;}
+
+  .foot{text-align:center; font-size:11px; color:var(--muted); margin-top:14px; line-height:1.7;}
+  .foot a{color:var(--sea-d);}
+
   /* 確認画面 */
   #done{display:none;}
-  .summary{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; font-size:13.5px; line-height:1.85; white-space:pre-wrap;}
-  .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
-  .btns button,.btns a{flex:1; min-width:45%; text-align:center; text-decoration:none; border-radius:9px; padding:13px; font-size:14px; font-weight:700; cursor:pointer; border:none;}
-  .b-copy{background:#e9f5f0; color:var(--grn-d); border:1px solid var(--grn)!important;}
-  .b-mail{background:var(--grn); color:#fff;}
-  .b-back{background:#eee; color:#444;}
+  #done .card{text-align:left;}
+  .donehead{text-align:center; margin:-2px 0 14px;}
+  .donehead .ck{display:inline-flex; width:54px; height:54px; border-radius:50%; background:var(--sea-l);
+    color:var(--sea); align-items:center; justify-content:center; font-size:28px; margin-bottom:8px;}
+  .donehead b{display:block; font-size:15px; color:var(--sea-d); font-family:"Zen Maru Gothic",sans-serif;}
+  .summary{background:#faf8f3; border:1px solid var(--line); border-radius:14px; padding:15px; font-size:13.5px; line-height:1.95; white-space:pre-wrap;}
+  .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .btns button,.btns a{flex:1; min-width:45%; text-align:center; text-decoration:none; border-radius:13px; padding:14px; font-size:14.5px; font-weight:700; cursor:pointer; border:none;}
+  .b-copy{background:var(--sea-l); color:var(--sea-d); border:1.5px solid var(--sea)!important;}
+  .b-mail{background:linear-gradient(135deg,#13917e,#0e7b6c); color:#fff; box-shadow:0 6px 16px rgba(14,123,108,.3);}
+  .b-back{background:#edeae3; color:#555;}
 </style>
 </head>
 <body>
 <header>
-  <h1>🏝️ 粟島 民宿 予約相談フォーム</h1>
-  <p>泊まりたい情報を入力 → 幹事（輝紀）が宿に確認します（非公式・個人運営）</p>
+  <div class="emoji">⛴　🏝　🌊　🐟　✨</div>
+  <h1>粟島 おとまり相談</h1>
+  <p>泊まりたい情報を入れるだけ。<br>幹事が島の宿に確認します（非公式・個人運営）</p>
 </header>
 <div class="wrap">
 
@@ -170,7 +220,7 @@
   <!-- 確認・送信後 -->
   <div id="done">
     <div class="card">
-      <h2>✅ この内容で送ります</h2>
+      <div class="donehead"><span class="ck">✓</span><b>この内容で送ります</b></div>
       <div class="summary" id="summary"></div>
       <div class="btns">
         <button class="b-copy" id="copy">📋 内容をコピー</button>
