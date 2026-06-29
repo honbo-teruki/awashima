@@ -127,6 +127,13 @@
       <input id="name" placeholder="例：粟島 太郎">
       <label class="f">電話番号 <span class="req">必須</span></label>
       <input id="tel" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
+      <label class="f">メールアドレス <span class="opt">任意（メール連絡希望の方は必須）</span></label>
+      <input id="email" type="email" inputmode="email" placeholder="例：taro@example.com">
+      <label class="f">希望の連絡方法 <span class="req">必須</span></label>
+      <div class="seg" id="contact">
+        <label><input type="radio" name="contact" value="電話" checked><span>📞 電話がいい</span></label>
+        <label><input type="radio" name="contact" value="メール"><span>✉️ メールがいい</span></label>
+      </div>
     </div>
 
     <!-- 日程・人数 -->
@@ -134,7 +141,7 @@
       <h2>② 宿泊の日程・人数</h2>
       <div class="row2">
         <div>
-          <label class="f">チェックイン日 <span class="req">必須</span></label>
+          <label class="f">行く日（チェックイン）<span class="req">必須</span></label>
           <input id="checkin" type="date">
         </div>
         <div>
@@ -200,6 +207,14 @@
         <label><input type="radio" name="pickup" value="送迎を希望する" checked><span>希望する</span></label>
         <label><input type="radio" name="pickup" value="送迎は不要"><span>不要</span></label>
       </div>
+
+      <label class="f" style="margin-top:14px">泊まりたいエリア <span class="opt">任意・要望でOK</span></label>
+      <div class="seg" id="area">
+        <label><input type="radio" name="area" value="内浦"><span>内浦</span></label>
+        <label><input type="radio" name="area" value="釜谷"><span>釜谷</span></label>
+        <label><input type="radio" name="area" value="どちらでもいい" checked><span>どちらでもいい</span></label>
+      </div>
+      <div class="hint">内浦・釜谷は粟島の2つの集落です。こだわりがなければ「どちらでもいい」でOK。</div>
 
       <label class="f" style="margin-top:14px">希望のお宿 <span class="opt">任意・未定でOK</span></label>
       <select id="yado"></select>
@@ -339,6 +354,7 @@ function expText(){
   if(other) t+=(t?"、":"")+"その他:"+other;
   return t||"特になし";
 }
+const pick=n=>document.querySelector('input[name='+n+']:checked').value;
 function buildSummary(){
   const meal=curMeal();
   const ci=$("checkin").value;
@@ -348,12 +364,15 @@ function buildSummary(){
     "■ 粟島 宿泊 予約相談",
     "代表者　： "+$("name").value,
     "電話　　： "+$("tel").value,
-    "チェックイン： "+ciTxt+"　／　"+$("nights").value+"泊",
+    "メール　： "+($("email").value||"（なし）"),
+    "希望の連絡方法： "+pick("contact"),
+    "行く日　： "+ciTxt+"　／　"+$("nights").value+"泊",
     "部屋数　： "+$("rooms").value+"室",
     "人数　　： 大人"+( +$("adults").value||0 )+"名・子供"+( +$("kids").value||0 )+"名",
     "食事　　： "+meal,
     "来る船　： "+$("boat").value,
-    "送迎　　： "+document.querySelector('input[name=pickup]:checked').value,
+    "送迎　　： "+pick("pickup"),
+    "エリア希望： "+pick("area"),
     "希望の宿： "+$("yado").value,
     "やりたいこと： "+expText(),
     "備考　　： "+($("note").value||"なし"),
@@ -363,8 +382,11 @@ function buildSummary(){
 function validate(){
   if(!$("name").value.trim()) return "代表者のお名前を入力してください。";
   if(!$("tel").value.trim())  return "電話番号を入力してください。";
-  if(!$("checkin").value)     return "チェックイン日を選んでください。";
+  if(!$("checkin").value)     return "行く日（チェックイン）を選んでください。";
   if((+$("adults").value||0)+(+$("kids").value||0)<=0) return "人数（大人・子供）を入力してください。";
+  const email=$("email").value.trim();
+  if(pick("contact")==="メール" && !email) return "メール連絡をご希望の場合は、メールアドレスを入力してください。";
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "メールアドレスの形式をご確認ください。";
   return "";
 }
 $("go").addEventListener("click",()=>{
@@ -375,10 +397,13 @@ $("go").addEventListener("click",()=>{
   const summary=buildSummary();
   $("summary").textContent=summary;
   const subject="【粟島 宿泊相談】"+$("name").value+"様 "+( $("checkin").value||"" );
-  $("mail").href="mailto:"+CONFIG.kanjiMail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(summary);
-  // 任意：スプレッドシート自動保存（GAS URLが設定されていれば送る）
+  const email=$("email").value.trim();
+  let href="mailto:"+CONFIG.kanjiMail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(summary);
+  if(email) href+="&cc="+encodeURIComponent(email);   // 相手にも控えが届く
+  $("mail").href=href;
+  // 任意：スプレッドシート自動保存＋自動メール通知（GAS URLが設定されていれば送る）
   if(CONFIG.sheetEndpoint){
-    try{ fetch(CONFIG.sheetEndpoint,{method:"POST",body:JSON.stringify(collectData())}); }catch(err){}
+    try{ fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",body:JSON.stringify(collectData())}); }catch(err){}
   }
   $("form").style.display="none"; $("done").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
 });
@@ -386,8 +411,9 @@ function collectData(){
   return {
     name:$("name").value, tel:$("tel").value, checkin:$("checkin").value, nights:$("nights").value,
     rooms:$("rooms").value, adults:$("adults").value, kids:$("kids").value, meal:curMeal(),
-    boat:$("boat").value, pickup:document.querySelector('input[name=pickup]:checked').value,
+    boat:$("boat").value, pickup:pick("pickup"), area:pick("area"),
     yado:$("yado").value, experiences:exps().join("、"), expOther:$("expOther").value,
+    email:$("email").value, contact:pick("contact"),
     note:$("note").value, ts:new Date().toString()
   };
 }
