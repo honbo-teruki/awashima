@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#127a5b">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>粟島 民宿 予約相談フォーム</title>
+<style>
+  :root{ --grn:#127a5b; --grn-d:#0c5d45; --bg:#eef6f2; --card:#fff; --txt:#1c2b33; --muted:#6b7a83; --line:#cfe0d8; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+    background:linear-gradient(180deg,#d7ece3,#eef6f2 40%); color:var(--txt); padding-bottom:40px;}
+  .wrap{max-width:520px; margin:0 auto; padding:0 12px;}
+  header{background:var(--grn); color:#fff; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  header h1{font-size:18px; margin:0;}
+  header p{margin:4px 0 0; font-size:11px; opacity:.9;}
+  .lead{background:#fffdf2; border:1px solid #ecd9a0; border-radius:10px; padding:11px 13px; font-size:12.5px; line-height:1.65; margin:14px 0;}
+  .lead b{color:var(--grn-d);}
+  .card{background:var(--card); border-radius:12px; padding:15px; margin-bottom:13px; box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .card h2{font-size:13px; margin:0 0 11px; color:var(--grn-d); border-left:4px solid var(--grn); padding-left:8px;}
+  label.f{display:block; font-size:13px; font-weight:600; margin:10px 0 4px;}
+  label.f .req{color:#d23; font-size:11px; margin-left:5px;}
+  label.f .opt{color:var(--muted); font-size:11px; margin-left:5px; font-weight:400;}
+  input,select,textarea{width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px; font-size:16px; outline:none; background:#fff; color:var(--txt);}
+  input:focus,select:focus,textarea:focus{border-color:var(--grn);}
+  textarea{min-height:64px; resize:vertical;}
+  .row2{display:flex; gap:10px;} .row2>div{flex:1;}
+  .seg{display:flex; gap:8px; flex-wrap:wrap;}
+  .seg label{flex:1; min-width:46%; border:1px solid var(--line); border-radius:8px; padding:9px; font-size:13px; text-align:center; cursor:pointer; background:#fff;}
+  .seg input{display:none;}
+  .seg input:checked + span{font-weight:700; color:var(--grn-d);}
+  .seg label:has(input:checked){border-color:var(--grn); background:#e9f5f0;}
+  .hint{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5;}
+  .boat-note{font-size:12px; background:#eef4fb; border:1px solid #cfe0ef; border-radius:8px; padding:8px 10px; margin-top:6px; color:#2a5f86;}
+  .price{background:#f3faf6; border:1px dashed var(--grn); border-radius:10px; padding:11px 13px; font-size:13px; line-height:1.7;}
+  .price .big{font-size:17px; font-weight:700; color:var(--grn-d);}
+  .price small{color:var(--muted); font-size:11px;}
+  .submit{width:100%; background:var(--grn); color:#fff; border:none; border-radius:10px; padding:15px; font-size:16px; font-weight:700; cursor:pointer; margin-top:6px;}
+  .submit:active{background:var(--grn-d);}
+  .err{color:#d23; font-size:12px; margin-top:8px; display:none;}
+  .foot{text-align:center; font-size:11px; color:var(--muted); margin-top:10px; line-height:1.6;}
+  .foot a{color:var(--grn-d);}
+  /* 確認画面 */
+  #done{display:none;}
+  .summary{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; font-size:13.5px; line-height:1.85; white-space:pre-wrap;}
+  .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .btns button,.btns a{flex:1; min-width:45%; text-align:center; text-decoration:none; border-radius:9px; padding:13px; font-size:14px; font-weight:700; cursor:pointer; border:none;}
+  .b-copy{background:#e9f5f0; color:var(--grn-d); border:1px solid var(--grn)!important;}
+  .b-mail{background:var(--grn); color:#fff;}
+  .b-back{background:#eee; color:#444;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏝️ 粟島 民宿 予約相談フォーム</h1>
+  <p>泊まりたい情報を入力 → 幹事（輝紀）が宿に確認します（非公式・個人運営）</p>
+</header>
+<div class="wrap">
+
+  <div class="lead">
+    これは<b>「予約の相談」フォーム</b>です。送信＝予約確定ではありません。<br>
+    入力内容をもとに、<b>粟島の宿へ「この日に泊まれますか？」と確認</b>し、取れ次第ご連絡します。<br>
+    ⚠️ <b>予約確定後の変更・キャンセルは、各自で直接お宿へ</b>ご連絡をお願いします🙇
+  </div>
+
+  <form id="form" autocomplete="on">
+    <!-- 代表者 -->
+    <div class="card">
+      <h2>① 代表者の連絡先</h2>
+      <label class="f">お名前 <span class="req">必須</span></label>
+      <input id="name" placeholder="例：粟島 太郎">
+      <label class="f">電話番号 <span class="req">必須</span></label>
+      <input id="tel" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
+    </div>
+
+    <!-- 日程・人数 -->
+    <div class="card">
+      <h2>② 宿泊の日程・人数</h2>
+      <div class="row2">
+        <div>
+          <label class="f">チェックイン日 <span class="req">必須</span></label>
+          <input id="checkin" type="date">
+        </div>
+        <div>
+          <label class="f">泊数 <span class="req">必須</span></label>
+          <select id="nights"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+      </div>
+      <div id="checkout-hint" class="hint"></div>
+
+      <label class="f">部屋数・人数の内訳 <span class="req">必須</span></label>
+      <div class="row2">
+        <div><span class="hint">部屋数</span><select id="rooms"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div><span class="hint">大人</span><input id="adults" type="number" inputmode="numeric" min="0" value="1"></div>
+        <div><span class="hint">子供</span><input id="kids" type="number" inputmode="numeric" min="0" value="0"></div>
+      </div>
+    </div>
+
+    <!-- 食事 -->
+    <div class="card">
+      <h2>③ 食事</h2>
+      <div class="seg" id="meal">
+        <label><input type="radio" name="meal" value="2食付（朝・夕）" checked><span>2食付（朝・夕）</span></label>
+        <label><input type="radio" name="meal" value="夕食のみ"><span>夕食のみ</span></label>
+        <label><input type="radio" name="meal" value="朝食のみ"><span>朝食のみ</span></label>
+        <label><input type="radio" name="meal" value="素泊まり"><span>素泊まり</span></label>
+      </div>
+      <div class="hint" style="margin-top:8px">料金の目安（大人・1泊／宿により異なります）</div>
+      <div class="price" id="price"></div>
+    </div>
+
+    <!-- 船 -->
+    <div class="card">
+      <h2>④ 何時の船で来ますか？</h2>
+      <div class="hint">チェックイン日の「岩船発（島へ向かう便）」から選べます。</div>
+      <select id="boat"></select>
+      <div id="boat-note" class="boat-note" style="display:none"></div>
+      <div class="hint" style="margin-top:6px">船の全時刻は <a id="ferrylink" href="index.html" target="_blank" rel="noopener">⛴️ 粟島汽船ダイヤ案内ボット</a> でも確認できます。</div>
+    </div>
+
+    <!-- 送迎・宿・備考 -->
+    <div class="card">
+      <h2>⑤ 港までの送迎</h2>
+      <div class="seg" id="pickup">
+        <label><input type="radio" name="pickup" value="送迎を希望する" checked><span>希望する</span></label>
+        <label><input type="radio" name="pickup" value="送迎は不要"><span>不要</span></label>
+      </div>
+
+      <label class="f" style="margin-top:14px">希望のお宿 <span class="opt">任意・未定でOK</span></label>
+      <select id="yado"></select>
+      <div class="hint">特に希望がなければ「おまかせ（未定）」でOK。空き状況で調整します。</div>
+
+      <label class="f" style="margin-top:14px">ご要望・備考 <span class="opt">任意</span></label>
+      <textarea id="note" placeholder="例：アレルギー、子供の年齢、和室希望、到着が遅れるかも 等"></textarea>
+    </div>
+
+    <button type="button" class="submit" id="go">この内容で相談する →</button>
+    <div class="err" id="err"></div>
+    <div class="foot">
+      入力された個人情報は、宿泊調整の目的のみに使用します。<br>
+      ※料金・空き状況は宿により異なります。最終的な金額は宿からの回答でご確認ください。
+    </div>
+  </form>
+
+  <!-- 確認・送信後 -->
+  <div id="done">
+    <div class="card">
+      <h2>✅ この内容で送ります</h2>
+      <div class="summary" id="summary"></div>
+      <div class="btns">
+        <button class="b-copy" id="copy">📋 内容をコピー</button>
+        <a class="b-mail" id="mail" href="#">✉️ 幹事に送る</a>
+      </div>
+      <div class="btns"><button class="b-back" id="back">← 入力に戻る</button></div>
+      <div class="foot" style="margin-top:14px">
+        「幹事に送る」を押すとメール（または対応アプリ）が開きます。送信すると幹事に届きます。<br>
+        ⚠️ 予約確定後の変更は各自で直接お宿へご連絡ください。
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- フェリー時刻データ（共通） -->
+<script src="schedule.js"></script>
+<script>
+/* ===== 設定 ===== */
+const CONFIG = {
+  kanjiMail: "honbo@reterras.co.jp",   // 幹事の連絡先（フォーム送信先）
+  sheetEndpoint: "",                   // ← Googleスプレッドシート連携(GAS)のURLを後でここに入れると自動保存される
+};
+
+/* 宿一覧（出典: awa-isle.jp/sightseeing/） */
+const YADO = [
+  {g:"内浦地区", items:["三吉","弥助","じんきち","みなとや","弥三郎","与平","治郎作","なおや","みやこや","ますや","旅館たてしま","かねひら旅館"]},
+  {g:"釜谷地区", items:["松太屋","渡佐","市左ェ門","源左ェ門","亀屋","後藤","八幡"]},
+];
+
+/* 料金目安（大人1泊・出典: 輝紀提供） */
+const PRICE = {
+  "2食付（朝・夕）": {lo:9900, hi:11000, label:"1泊2食"},
+  "素泊まり":      {lo:6050, hi:6600,  label:"素泊まり"},
+  // 朝/夕のみは「素泊まり〜2食」の間。正確な額は宿により異なるため範囲で表示
+  "夕食のみ":      {lo:null, hi:null,  label:"夕食のみ（素泊まり＋夕食代）"},
+  "朝食のみ":      {lo:null, hi:null,  label:"朝食のみ（素泊まり＋朝食代）"},
+};
+const yen = n => n.toLocaleString("ja-JP")+"円";
+
+/* ---- 宿プルダウン ---- */
+const $=id=>document.getElementById(id);
+(function(){
+  const sel=$("yado"); sel.innerHTML='<option value="おまかせ（未定）">おまかせ（未定）</option>';
+  for(const grp of YADO){
+    const og=document.createElement("optgroup"); og.label=grp.g;
+    for(const n of grp.items){ const o=document.createElement("option"); o.value=n; o.textContent=n; og.appendChild(o); }
+    sel.appendChild(og);
+  }
+})();
+
+/* ---- チェックイン日：デフォルト＆ダイヤ範囲 ---- */
+(function(){
+  const ci=$("checkin");
+  ci.min="2026-03-01"; ci.max="2026-09-30";
+})();
+
+/* ---- 料金目安の更新 ---- */
+function curMeal(){ return document.querySelector('input[name=meal]:checked').value; }
+function updatePrice(){
+  const meal=curMeal(); const ad=+$("adults").value||0; const kd=+$("kids").value||0;
+  const p=PRICE[meal];
+  let html="";
+  if(p.lo!=null){
+    const lo=ad*p.lo + kd*Math.max(p.lo-1000,0);
+    const hi=ad*p.hi + kd*Math.max(p.hi-1000,0);
+    html=`<span class="big">約 ${yen(lo)} 〜 ${yen(hi)}</span><br>`+
+         `<small>${p.label}：大人 約${yen(p.lo)}〜${yen(p.hi)} ／ 子供 大人−約1,000円</small>`;
+  }else{
+    const s=PRICE["素泊まり"], f=PRICE["2食付（朝・夕）"];
+    html=`<span class="big">宿に要確認</span><br>`+
+         `<small>${p.label}。目安は「素泊まり（約${yen(s.lo)}〜）」〜「2食付（約${yen(f.hi)}）」の間。子供は大人−約1,000円</small>`;
+  }
+  html+=`<br><small>※別途クーラー代がかかる場合があります。あくまで目安・要確認です。</small>`;
+  $("price").innerHTML=html;
+}
+
+/* ---- 船プルダウン（チェックイン日の岩船発）---- */
+function updateBoats(){
+  const sel=$("boat"), note=$("boat-note"); sel.innerHTML="";
+  const v=$("checkin").value;
+  const add=(val,txt)=>{const o=document.createElement("option");o.value=val;o.textContent=txt;sel.appendChild(o);};
+  add("未定・あとで連絡","未定・あとで連絡");
+  note.style.display="none";
+  if(!v){ return; }
+  const d=new Date(v+"T00:00:00");
+  const r=boatsFor(d,"岩");   // 島へ向かう便
+  if(r.outOfRange){ note.style.display="block"; note.textContent="この日付は現在のダイヤ表（3〜9月）の範囲外です。船の時刻は粟島汽船の公式でご確認ください。"; return; }
+  if(r.list.length===0){ note.style.display="block"; note.textContent="この日は岩船発の便が見当たりません。日付をご確認ください。"; return; }
+  for(const s of r.list){ add(`岩船発 ${s.t}（粟島着 ${s.a}）${s.hs?" 高速船":""}`, `岩船発 ${s.t} → 粟島着 ${s.a}${s.hs?" 🚤高速船":""}`); }
+  if(r.label){ note.style.display="block"; note.textContent="この日は特別ダイヤ（"+r.label+"）です。"; }
+}
+
+/* ---- 泊数→チェックアウト表示 ---- */
+function updateCheckout(){
+  const v=$("checkin").value; const n=+$("nights").value||1;
+  if(!v){ $("checkout-hint").textContent=""; return; }
+  const d=new Date(v+"T00:00:00"); d.setDate(d.getDate()+n);
+  const w=["日","月","火","水","木","金","土"][d.getDay()];
+  $("checkout-hint").textContent=`チェックアウト：${d.getMonth()+1}月${d.getDate()}日(${w}) 予定（${n}泊）`;
+}
+
+/* ---- イベント ---- */
+$("meal").addEventListener("change",updatePrice);
+$("adults").addEventListener("input",updatePrice);
+$("kids").addEventListener("input",updatePrice);
+$("checkin").addEventListener("change",()=>{updateBoats();updateCheckout();});
+$("nights").addEventListener("change",updateCheckout);
+updatePrice(); updateBoats();
+
+/* ---- 送信 ---- */
+function buildSummary(){
+  const meal=curMeal();
+  const ci=$("checkin").value;
+  let ciTxt=ci;
+  if(ci){const d=new Date(ci+"T00:00:00");const w=["日","月","火","水","木","金","土"][d.getDay()];ciTxt=`${d.getMonth()+1}月${d.getDate()}日(${w})`;}
+  const lines=[
+    "■ 粟島 宿泊 予約相談",
+    "代表者　： "+$("name").value,
+    "電話　　： "+$("tel").value,
+    "チェックイン： "+ciTxt+"　／　"+$("nights").value+"泊",
+    "部屋数　： "+$("rooms").value+"室",
+    "人数　　： 大人"+( +$("adults").value||0 )+"名・子供"+( +$("kids").value||0 )+"名",
+    "食事　　： "+meal,
+    "来る船　： "+$("boat").value,
+    "送迎　　： "+document.querySelector('input[name=pickup]:checked').value,
+    "希望の宿： "+$("yado").value,
+    "備考　　： "+($("note").value||"なし"),
+  ];
+  return lines.join("\n");
+}
+function validate(){
+  if(!$("name").value.trim()) return "代表者のお名前を入力してください。";
+  if(!$("tel").value.trim())  return "電話番号を入力してください。";
+  if(!$("checkin").value)     return "チェックイン日を選んでください。";
+  if((+$("adults").value||0)+(+$("kids").value||0)<=0) return "人数（大人・子供）を入力してください。";
+  return "";
+}
+$("go").addEventListener("click",()=>{
+  const e=validate();
+  const box=$("err");
+  if(e){ box.textContent=e; box.style.display="block"; window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}); return; }
+  box.style.display="none";
+  const summary=buildSummary();
+  $("summary").textContent=summary;
+  const subject="【粟島 宿泊相談】"+$("name").value+"様 "+( $("checkin").value||"" );
+  $("mail").href="mailto:"+CONFIG.kanjiMail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(summary);
+  // 任意：スプレッドシート自動保存（GAS URLが設定されていれば送る）
+  if(CONFIG.sheetEndpoint){
+    try{ fetch(CONFIG.sheetEndpoint,{method:"POST",body:JSON.stringify(collectData())}); }catch(err){}
+  }
+  $("form").style.display="none"; $("done").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
+});
+function collectData(){
+  return {
+    name:$("name").value, tel:$("tel").value, checkin:$("checkin").value, nights:$("nights").value,
+    rooms:$("rooms").value, adults:$("adults").value, kids:$("kids").value, meal:curMeal(),
+    boat:$("boat").value, pickup:document.querySelector('input[name=pickup]:checked').value,
+    yado:$("yado").value, note:$("note").value, ts:new Date().toString()
+  };
+}
+$("copy").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText($("summary").textContent); $("copy").textContent="✅ コピーしました"; }
+  catch(e){ $("copy").textContent="長押しでコピーしてください"; }
+});
+$("back").addEventListener("click",()=>{ $("done").style.display="none"; $("form").style.display="block"; });
+</script>
+</body>
+</html>
