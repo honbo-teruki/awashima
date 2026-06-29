@@ -39,6 +39,10 @@
   .lead{background:#fff; border:1px solid var(--sand); border-left:4px solid #e6b34d; border-radius:14px;
     padding:13px 15px; font-size:12.5px; line-height:1.75; margin:16px 0; box-shadow:var(--shadow); color:#4a525a;}
   .lead b{color:var(--sea-d);}
+  .editbar{display:none; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 14px; margin:0 0 14px; font-size:12.5px; box-shadow:var(--shadow); color:#4a525a;}
+  .editbar button{width:auto; background:#fff; color:var(--sea-d); border:1.5px solid var(--sea); border-radius:10px; padding:9px 13px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .revnote{background:#fff7e6; border:1px solid #f0cf86; color:#8a5a12; border-radius:12px; padding:10px 13px; font-size:12.5px; margin:0 0 14px; font-weight:500; line-height:1.6;}
 
   .card{background:var(--card); border-radius:18px; padding:18px 16px; margin-bottom:14px; box-shadow:var(--shadow);}
   .card h2{font-size:14px; margin:0 0 13px; color:var(--sea-d); display:flex; align-items:center; gap:9px; font-weight:700;}
@@ -118,6 +122,12 @@
     入力内容をもとに、<b>粟島の宿へ「この日に泊まれますか？」と確認</b>し、取れ次第ご連絡します。<br>
     ⚠️ <b>予約確定後の変更・キャンセルは、各自で直接お宿へ</b>ご連絡をお願いします🙇
   </div>
+
+  <div class="editbar" id="editbar">
+    <span>📩 前に送った内容を<b>直したい</b>方はこちら</span>
+    <button type="button" id="loadlast">✏️ 前回の内容を呼び出して修正</button>
+  </div>
+  <div class="revnote" id="revnote" style="display:none">✏️ <b>修正モード</b>：内容を直して、もう一度送信してください。<b>最新版（修正版）</b>として届きます。</div>
 
   <form id="form" autocomplete="on">
     <!-- 代表者 -->
@@ -243,7 +253,8 @@
       </div>
       <div class="btns"><button class="b-back" id="back">← 入力に戻る</button></div>
       <div class="foot" style="margin-top:14px">
-        「幹事に送る」を押すとメール（または対応アプリ）が開きます。送信すると幹事に届きます。<br>
+        「幹事に送る」を押すとメール（または対応アプリ）が開きます。送信すると幹事＋ご自身（メール入力時）に届きます。<br>
+        ✏️ 内容を間違えたら「← 入力に戻る」で直して再送信すると、<b>最新版（修正版）</b>として届きます。<br>
         ⚠️ 予約確定後の変更は各自で直接お宿へご連絡ください。
       </div>
     </div>
@@ -275,6 +286,10 @@ const PRICE = {
   "朝食のみ":      {lo:null, hi:null,  label:"朝食のみ（素泊まり＋朝食代）"},
 };
 const yen = n => n.toLocaleString("ja-JP")+"円";
+
+/* ---- 状態 ---- */
+let revision=false;            // 修正版かどうか
+const STORE_KEY="awa_yado_last";
 
 /* ---- 宿プルダウン ---- */
 const $=id=>document.getElementById(id);
@@ -361,7 +376,7 @@ function buildSummary(){
   let ciTxt=ci;
   if(ci){const d=new Date(ci+"T00:00:00");const w=["日","月","火","水","木","金","土"][d.getDay()];ciTxt=`${d.getMonth()+1}月${d.getDate()}日(${w})`;}
   const lines=[
-    "■ 粟島 宿泊 予約相談",
+    "■ 粟島 宿泊 予約相談"+(revision?"（※修正版・前回分を更新）":""),
     "代表者　： "+$("name").value,
     "電話　　： "+$("tel").value,
     "メール　： "+($("email").value||"（なし）"),
@@ -396,7 +411,7 @@ $("go").addEventListener("click",()=>{
   box.style.display="none";
   const summary=buildSummary();
   $("summary").textContent=summary;
-  const subject="【粟島 宿泊相談】"+$("name").value+"様 "+( $("checkin").value||"" );
+  const subject="【粟島 宿泊相談"+(revision?"・修正版":"")+"】"+$("name").value+"様 "+( $("checkin").value||"" );
   const email=$("email").value.trim();
   let href="mailto:"+CONFIG.kanjiMail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(summary);
   if(email) href+="&cc="+encodeURIComponent(email);   // 相手にも控えが届く
@@ -405,6 +420,7 @@ $("go").addEventListener("click",()=>{
   if(CONFIG.sheetEndpoint){
     try{ fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",body:JSON.stringify(collectData())}); }catch(err){}
   }
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(collectData())); $("editbar").style.display="flex"; }catch(e){}
   $("form").style.display="none"; $("done").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
 });
 function collectData(){
@@ -413,7 +429,7 @@ function collectData(){
     rooms:$("rooms").value, adults:$("adults").value, kids:$("kids").value, meal:curMeal(),
     boat:$("boat").value, pickup:pick("pickup"), area:pick("area"),
     yado:$("yado").value, experiences:exps().join("、"), expOther:$("expOther").value,
-    email:$("email").value, contact:pick("contact"),
+    email:$("email").value, contact:pick("contact"), kind:revision?"修正版":"新規",
     note:$("note").value, ts:new Date().toString()
   };
 }
@@ -421,7 +437,34 @@ $("copy").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText($("summary").textContent); $("copy").textContent="✅ コピーしました"; }
   catch(e){ $("copy").textContent="長押しでコピーしてください"; }
 });
-$("back").addEventListener("click",()=>{ $("done").style.display="none"; $("form").style.display="block"; });
+$("back").addEventListener("click",()=>{
+  $("done").style.display="none"; $("form").style.display="block";
+  revision=true; $("revnote").style.display="block";   // 戻って直す＝修正版扱い
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* ---- 修正：前回送った内容を呼び出して直す ---- */
+function setRadio(name,val){ const el=document.querySelector('input[name='+name+'][value="'+val+'"]'); if(el) el.click(); }
+function loadSaved(){
+  let d; try{ d=JSON.parse(localStorage.getItem(STORE_KEY)||""); }catch(e){}
+  if(!d){ alert("前回の入力が見つかりませんでした（この端末・ブラウザに保存がない場合は出ません）。"); return; }
+  $("name").value=d.name||""; $("tel").value=d.tel||""; $("email").value=d.email||"";
+  setRadio("contact",d.contact);
+  $("checkin").value=d.checkin||""; $("checkin").dispatchEvent(new Event("change"));
+  $("nights").value=d.nights||"1"; $("nights").dispatchEvent(new Event("change"));
+  $("rooms").value=d.rooms||"1"; $("adults").value=d.adults||"1"; $("kids").value=d.kids||"0";
+  setRadio("meal",d.meal); updatePrice();
+  const bo=[...$("boat").options].find(o=>o.value===d.boat); if(bo) $("boat").value=d.boat;
+  setRadio("pickup",d.pickup); setRadio("area",d.area);
+  $("yado").value=d.yado||"おまかせ（未定）";
+  const exset=new Set(String(d.experiences||"").split("、").filter(Boolean));
+  document.querySelectorAll('input[name=exp]').forEach(c=>{ c.checked=exset.has(c.value); });
+  $("expOther").value=d.expOther||""; $("note").value=d.note||"";
+  revision=true; $("revnote").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("loadlast").addEventListener("click",loadSaved);
+if(localStorage.getItem(STORE_KEY)) $("editbar").style.display="flex";
 </script>
 </body>
 </html>
