@@ -245,15 +245,15 @@
   <!-- 確認・送信後 -->
   <div id="done">
     <div class="card">
-      <div class="donehead"><span class="ck">✓</span><b>この内容で送ります</b></div>
+      <div class="donehead"><span class="ck">✓</span><b>送信しました！</b><div style="font-size:12px;color:var(--muted);margin-top:4px;font-weight:400">幹事に届きました。宿の空き状況を確認してご連絡します🙏</div></div>
       <div class="summary" id="summary"></div>
       <div class="btns">
         <button class="b-copy" id="copy">📋 内容をコピー</button>
-        <a class="b-mail" id="mail" href="#">✉️ 幹事に送る</a>
+        <a class="b-mail" id="mail" href="#">✉️ メールでも送る（任意）</a>
       </div>
       <div class="btns"><button class="b-back" id="back">← 入力に戻る</button></div>
       <div class="foot" style="margin-top:14px">
-        「幹事に送る」を押すとメール（または対応アプリ）が開きます。送信すると幹事＋ご自身（メール入力時）に届きます。<br>
+        送信内容は自動で幹事に届き、控えメールもお送りします（メール入力時）。「✉️ メールでも送る」は任意の控えです。<br>
         ✏️ 内容を間違えたら「← 入力に戻る」で直して再送信すると、<b>最新版（修正版）</b>として届きます。<br>
         ⚠️ 予約確定後の変更は各自で直接お宿へご連絡ください。
       </div>
@@ -268,7 +268,7 @@
 /* ===== 設定 ===== */
 const CONFIG = {
   kanjiMail: "honbo@reterras.co.jp",   // 幹事の連絡先（フォーム送信先）
-  sheetEndpoint: "",                   // ← Googleスプレッドシート連携(GAS)のURLを後でここに入れると自動保存される
+  sheetEndpoint: "https://script.google.com/macros/s/AKfycbwEpEtxiRDrs4_gnv60VC_wd5h48ux-fY0y6wmPmOGJX-Hp6LsGdRtjb-kL4uGge8U1_g/exec",  // GAS（スプレッドシート＆自動通知）
 };
 
 /* 宿一覧（出典: awa-isle.jp/sightseeing/） */
