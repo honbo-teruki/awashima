@@ -144,3 +144,83 @@ function parseDate_(v){
 function doGet(){
   return ContentService.createTextOutput("粟島 宿泊相談 受付スクリプト 稼働中");
 }
+
+
+/* ============================================================
+   予約管理ダッシュボード
+   使い方: 関数の選択で setupDashboard を選び ▶実行（初回は権限承認）。
+   以降「予約相談」シートで ステータス と 確定宿 を入れると自動で集計されます。
+   ※Webアプリの再デプロイは不要（エディタで1回実行するだけ）。
+   ============================================================ */
+var INNS = [
+  ["内浦","三吉"],["内浦","弥助"],["内浦","じんきち"],["内浦","みなとや"],["内浦","弥三郎"],["内浦","与平"],
+  ["内浦","治郎作"],["内浦","なおや"],["内浦","みやこや"],["内浦","ますや"],["内浦","旅館たてしま"],["内浦","かねひら旅館"],
+  ["釜谷","松太屋"],["釜谷","渡佐"],["釜谷","市左ェ門"],["釜谷","源左ェ門"],["釜谷","亀屋"],["釜谷","後藤"],["釜谷","八幡"]
+];
+var STATUS_LIST = ["新規","打診中","確定","見送り","キャンセル"];
+
+function setupDashboard(){
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  if(data.getLastRow()===0) data.appendRow(HEADER);
+
+  // 管理列 W:ステータス / X:確定宿 / Y:メモ / Z:LINE打診文（コピー用）
+  data.getRange("W1").setValue("ステータス");
+  data.getRange("X1").setValue("確定宿（実際に予約した宿）");
+  data.getRange("Y1").setValue("メモ");
+  data.getRange("Z1").setValue("LINE打診文（コピー用）");
+  data.getRange("Z2").setFormula(
+    '=ARRAYFORMULA(IF($A2:$A="","","【宿の打診】"&$G2:$G&" "&$H2:$H&"泊 大人"&$J2:$J&"・子供"&$K2:$K&" エリア希望:"&$O2:$O&" 宿希望:"&$P2:$P&" → この日いける宿さんいますか？"))'
+  );
+
+  var stRule = SpreadsheetApp.newDataValidation().requireValueInList(STATUS_LIST, true).setAllowInvalid(true).build();
+  data.getRange("W2:W2000").setDataValidation(stRule);
+  var innNames = INNS.map(function(x){return x[1];}).concat(["（未定）"]);
+  var innRule = SpreadsheetApp.newDataValidation().requireValueInList(innNames, true).setAllowInvalid(true).build();
+  data.getRange("X2:X2000").setDataValidation(innRule);
+
+  // ダッシュボードシート（再実行で作り直し）
+  var dash = ss.getSheetByName("ダッシュボード");
+  if(dash){ dash.clear(); } else { dash = ss.insertSheet("ダッシュボード", 0); }
+  var S = "'" + SHEET_NAME + "'";
+
+  dash.getRange("A1").setValue("📊 粟島 宿泊予約 ダッシュボード").setFontSize(14).setFontWeight("bold");
+  dash.getRange("A2").setValue("「" + SHEET_NAME + "」シートで ステータス と 確定宿 を入れると自動で集計されます").setFontColor("#888888");
+
+  var kpi = [
+    ["総相談数", "=COUNTA(" + S + "!A2:A)"],
+    ["確定",     '=COUNTIF(' + S + '!W2:W,"確定")'],
+    ["打診中",   '=COUNTIF(' + S + '!W2:W,"打診中")'],
+    ["未対応",   '=COUNTA(' + S + '!A2:A)-COUNTIF(' + S + '!W2:W,"確定")-COUNTIF(' + S + '!W2:W,"打診中")-COUNTIF(' + S + '!W2:W,"見送り")-COUNTIF(' + S + '!W2:W,"キャンセル")'],
+    ["見送り/キャンセル", '=COUNTIF(' + S + '!W2:W,"見送り")+COUNTIF(' + S + '!W2:W,"キャンセル")']
+  ];
+  dash.getRange(4,1,kpi.length,1).setValues(kpi.map(function(r){return [r[0]];})).setFontWeight("bold");
+  dash.getRange(4,2,kpi.length,1).setFormulas(kpi.map(function(r){return [r[1]];}));
+
+  var hRow = 4 + kpi.length + 1;
+  dash.getRange(hRow,1).setValue("■ 宿別 確定実績（累計）").setFontWeight("bold");
+  dash.getRange(hRow+1,1,1,5).setValues([["エリア","宿","確定件数","延べ人数","件数バー"]]).setFontWeight("bold").setBackground("#e3f2ee");
+  var first = hRow + 2;
+  dash.getRange(first,1,INNS.length,2).setValues(INNS);
+  var fm = INNS.map(function(inn,i){
+    var r = first + i;
+    return [
+      '=COUNTIFS(' + S + '!$X$2:$X,$B' + r + ',' + S + '!$W$2:$W,"確定")',
+      '=SUMIFS(' + S + '!$J$2:$J,' + S + '!$X$2:$X,$B' + r + ',' + S + '!$W$2:$W,"確定")+SUMIFS(' + S + '!$K$2:$K,' + S + '!$X$2:$X,$B' + r + ',' + S + '!$W$2:$W,"確定")',
+      '=REPT("█",$C' + r + ')'
+    ];
+  });
+  dash.getRange(first,3,fm.length,3).setFormulas(fm);
+
+  var tot = first + INNS.length;
+  dash.getRange(tot,2).setValue("合計").setFontWeight("bold");
+  dash.getRange(tot,3).setFormula("=SUM(C" + first + ":C" + (tot-1) + ")").setFontWeight("bold");
+  dash.getRange(tot,4).setFormula("=SUM(D" + first + ":D" + (tot-1) + ")").setFontWeight("bold");
+  dash.getRange(tot+1,2).setValue("内浦 計");
+  dash.getRange(tot+1,3).setFormula('=SUMIFS(C' + first + ':C' + (tot-1) + ',A' + first + ':A' + (tot-1) + ',"内浦")');
+  dash.getRange(tot+2,2).setValue("釜谷 計");
+  dash.getRange(tot+2,3).setFormula('=SUMIFS(C' + first + ':C' + (tot-1) + ',A' + first + ':A' + (tot-1) + ',"釜谷")');
+
+  dash.setColumnWidth(1,64); dash.setColumnWidth(2,150); dash.setColumnWidth(5,220);
+  ss.toast("ダッシュボードを作成しました ✅");
+}
