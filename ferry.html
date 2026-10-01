@@ -78,10 +78,10 @@
   </div>
 
   <form id="form" autocomplete="off">
-    <input id="q" placeholder="例：6月20日 / 土曜の粟島発 / 明日 帰りの船">
+    <input id="q" placeholder="例：1月15日 / 土曜の粟島発 / 明日 帰りの船">
     <button class="send" type="submit" aria-label="送信">➤</button>
   </form>
-  <div class="foot"><a href="index.html" style="color:#127a5b;font-weight:700">🏝️ 宿の予約相談はこちら</a><br>データ版: 令和8年3〜9月ダイヤ ／ v4（6/16・全便検証済）｜最新・確実な情報は公式サイトでご確認ください</div>
+  <div class="foot"><a href="index.html" style="color:#127a5b;font-weight:700">🏝️ 宿の予約相談はこちら</a><br>データ版: 令和8年10月〜令和9年2月ダイヤ ／ v5（10/1・全便検証済）｜最新・確実な情報は公式サイトでご確認ください</div>
 </div>
 
 <script src="schedule.js"></script>
@@ -91,7 +91,7 @@
 
 /* ---------- ユーティリティ ---------- */
 const ZEN2HAN=s=>s.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
-const fmtDate=d=>`${d.getMonth()+1}月${d.getDate()}日(${DOW[d.getDay()]})`;
+const fmtDate=d=>`${d.getFullYear()!==new Date().getFullYear()?d.getFullYear()+"年":""}${d.getMonth()+1}月${d.getDate()}日(${DOW[d.getDay()]})`; // 年が今年と違うときだけ年を出す
 
 /* ---------- 日付の解釈 ---------- */
 function parseDate(text){
@@ -100,8 +100,16 @@ function parseDate(text){
   if(/今日|本日/.test(t)) return today;
   if(/明後日|あさって/.test(t)){const d=new Date(today);d.setDate(d.getDate()+2);return d;}
   if(/明日|あした|あす/.test(t)){const d=new Date(today);d.setDate(d.getDate()+1);return d;}
-  let m=t.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日?/);
-  if(m) return new Date(today.getFullYear(),+m[1]-1,+m[2]); // ダイヤは当年(2026)固定。翌年送りしない
+  let m=t.match(/(?:(?:(\d{4})|令和\s*(\d{1,2}))\s*年\s*の?\s*)?(\d{1,2})\s*月\s*(\d{1,2})\s*日?/);
+  if(m){
+    const mo=+m[3]-1, da=+m[4];
+    if(m[1]||m[2]) return new Date(m[1]?+m[1]:2018+(+m[2]),mo,da);   // 年の指定あり（西暦 or 令和）
+    // ダイヤが年をまたぐ(10月〜翌2月)ので、年の指定がなければ「今日以降で一番近いその日付」。
+    // ただしそれがダイヤ範囲外で、直近の過去側だけが範囲内ならそちらで答える（例: 11/2に「11月1日」、1/1に「12月31日」）
+    const y=today.getFullYear(), d=new Date(y,mo,da);
+    const [next,prev]= d>=today ? [d,new Date(y-1,mo,da)] : [new Date(y+1,mo,da),d];   // 今日以降の直近 / 直近の過去
+    return (day_out_of_range(next)&&!day_out_of_range(prev))?prev:next;
+  }
   m=t.match(/(\d{1,2})\s*日/);
   if(m){let d=new Date(today.getFullYear(),today.getMonth(),+m[1]); if(d<today) d=new Date(today.getFullYear(),today.getMonth()+1,+m[1]); return d;}
   const wd=["日曜","月曜","火曜","水曜","木曜","金曜","土曜"];
@@ -119,12 +127,12 @@ function parseDir(text){
 /* ---------- 返答の組み立て ---------- */
 function answerSchedule(text){
   const d=parseDate(text);
-  if(!d) return `日付がわかりませんでした🙏\n「今日」「明日」「6月20日」「土曜」などで聞いてください。`;
+  if(!d) return `日付がわかりませんでした🙏\n「今日」「明日」「1月15日」「土曜」などで聞いてください。`;
   const dir=parseDir(text);
 
   let html=`<span class="day">📅 ${fmtDate(d)}</span>`;
   if(day_out_of_range(d)){
-    return html+`この日付は今のダイヤ表（${INFO.source}・3〜9月）の範囲外です。`+
+    return html+`この日付は今のダイヤ表（${INFO.source}）の範囲外です。`+
       `最新は<a href="${INFO.official}" target="_blank" rel="noopener">公式サイト</a>でご確認ください。`;
   }
   const res=scheduleForDate(d);
@@ -147,8 +155,8 @@ function answerSchedule(text){
   }
   html+=`</table>`;
   html+=`<span class="note">「粟島発」＝島→岩船 ／ 「岩船発」＝岩船→島`+
-        (anyHs?`<br>この期間は高速船（約60分）`:`<br>フェリー（約95分）`)+`｜出航15分前までに受付`+
-        `<br>※海上状況で変更あり → <a href="${INFO.official}" target="_blank" rel="noopener">当日の運航状況</a> / TEL ${INFO.tel}</span>`;
+        (anyHs?`<br>この期間は高速船（約60分）`:`<br>フェリー（約95分）`)+`｜荷物の受付は出航20分前まで`+
+        `<br>※海上状況で変更あり → <a href="${INFO.status}" target="_blank" rel="noopener">当日の運航状況</a> / TEL ${INFO.tel}</span>`;
   return html;
 }
 const day_out_of_range=d=>{const s=iso(d);return s<INFO.validFrom||s>INFO.validTo;};
@@ -163,7 +171,7 @@ function answerFare(){
 function respond(text){
   if(/運賃|料金|いくら|値段|金額/.test(ZEN2HAN(text))) return answerFare();
   if(/使い方|ヘルプ|help|何ができ/.test(text))
-    return `日付を入れて聞いてください😊\n例：\n・「今日の船」\n・「6月20日」\n・「土曜の粟島発」\n・「明日 帰りの船」\n・「運賃」`;
+    return `日付を入れて聞いてください😊\n例：\n・「今日の船」\n・「1月15日」\n・「土曜の粟島発」\n・「明日 帰りの船」\n・「運賃」`;
   return answerSchedule(text);
 }
 

@@ -319,7 +319,7 @@ const $=id=>document.getElementById(id);
 /* ---- チェックイン日：デフォルト＆ダイヤ範囲 ---- */
 (function(){
   const ci=$("checkin");
-  ci.min="2026-03-01"; ci.max="2026-09-30";
+  ci.min=INFO.validFrom; ci.max=INFO.validTo;   // schedule.js のダイヤ有効期間に連動
 })();
 
 /* ---- 料金目安の更新 ---- */
@@ -352,7 +352,7 @@ function updateBoats(){
   if(!v){ return; }
   const d=new Date(v+"T00:00:00");
   const r=boatsFor(d,"岩");   // 島へ向かう便
-  if(r.outOfRange){ note.style.display="block"; note.textContent="この日付は現在のダイヤ表（3〜9月）の範囲外です。船の時刻は粟島汽船の公式でご確認ください。"; return; }
+  if(r.outOfRange){ note.style.display="block"; note.textContent="この日付は現在のダイヤ表（"+INFO.source+"）の範囲外です。船の時刻は粟島汽船の公式でご確認ください。"; return; }
   if(r.list.length===0){ note.style.display="block"; note.textContent="この日は岩船発の便が見当たりません。日付をご確認ください。"; return; }
   for(const s of r.list){ add(`岩船発 ${s.t}（粟島着 ${s.a}）${s.hs?" 高速船":""}`, `岩船発 ${s.t} → 粟島着 ${s.a}${s.hs?" 🚤高速船":""}`); }
   if(r.label){ note.style.display="block"; note.textContent="この日は特別ダイヤ（"+r.label+"）です。"; }
