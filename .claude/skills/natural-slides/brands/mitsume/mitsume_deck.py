@@ -293,7 +293,7 @@ class Deck:
 
     def points3(self, slide, labels, captions):
         """3つの円（見本15枚目）。直径467のピンクの円に①②③と赤20pt太字、下に11ptの説明。"""
-        lab_pt = min(fit(l, 400, 20) for l in labels)
+        lab_pt = min(fit(l, 300, 20) for l in labels)  # 円の中で文字が入る幅は直径の約3分の2
         cap_pt = min(fit(c, 592, 11) for c in captions)
         for i, (lab, cap) in enumerate(zip(labels, captions)):
             x = 147 + i * 592
